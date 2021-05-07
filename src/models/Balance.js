@@ -94,3 +94,6 @@ class Balance {
 
 
 }
+
+
+module.exports = Balance
