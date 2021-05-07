@@ -7,7 +7,7 @@ struct Cmp {
   }
 } cmp;
 
-void calculateBalance(
+void calculateBalance (
   vector<vector<int>>& graph,
   priority_queue<pair<int, int>, vector<pair<int, int>>, Cmp>& credit,
   priority_queue<pair<int, int>, vector<pair<int, int>>, Cmp>& debit
@@ -183,7 +183,11 @@ int main() {
   // 1. 100rs paid by Shobhit, which is to be divided among all four.
   // 2. 200rs paid by Harshit, which will paid only by him.
 
-  vector<vector<vector<int>>> transactions = {{{100, 0}, {0,1,2,3}}, {{200, 1}, {1,3}}, {{200, 2}, {1,2,3,0}}};
+  vector<vector<vector<int>>> transactions = {
+    {{100, 0}, {0,1,2,3}},
+    {{200, 1}, {1,3}},
+    {{200, 2}, {1,2,3,0}}
+  };
 
   for (vector<vector<int>>& tr: transactions) dutch(graph, tr);
 
