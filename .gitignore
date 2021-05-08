@@ -1,1 +1,3 @@
 node_modules/
+default.log
+src/config/serviceAccount.json
