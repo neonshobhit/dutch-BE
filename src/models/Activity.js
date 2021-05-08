@@ -5,22 +5,27 @@ class Activity {
         this.graph = graph
     }
 
+    getGraph() {
+        return this.graph
+    }
 
     dutch(paidBy, splitIn, amount) {
         let len = splitIn.length
-        let share = (amount / len).toFixed(2);
+        let share = parseFloat((amount / len).toPrecision(2))
 
-        for (let i = 0; i < len; ++i) {
-            if (i === paidBy) continue;
+        for (let owedBy of splitIn) {
+            if (owedBy === paidBy) continue;
+
             let toPay = share;
 
-            let due = graph[paidBy][splitIn[i]]
-            let contribution = Math.min(due, share)
+            let due = this.graph[paidBy][owedBy]
+            let contribute = Math.min(due, share);
 
-            this.graph[paidBy][splitIn[i]] -= contribution;
-            toPay -= contribution;
+            this.graph[paidBy][owedBy] -= contribute
+            toPay -= contribute;
 
-            this.graph[splitIn[i]][paidBy] += toPay;
+            this.graph[owedBy][paidBy] += toPay;
+
         }
     }
 

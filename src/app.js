@@ -6,10 +6,34 @@ const {
 
 
 const populate = async () => {
-    // Populate some data from here.
-    // Take data from dummy data folder
-
+    let graph = []
+    let people = 4;
     const Activity = require('./models/Activity')
+    {
+        let dummy = []
+        for (let i = 0; i < people; ++i) {
+            dummy.push(0);
+        }
+        for (let i = 0; i < people; ++i) {
+            graph.push([...dummy]);
+        }
+    }
+
+
+    let Activityobject = new Activity(graph);
+
+    let split = [3,2,1,0]
+    Activityobject.dutch(0, split, 100)
+
+    graph = Activityobject.getGraph();
+
+    // for (let i = 0; i < people; i++) {
+    //     // for (let j = 0; j < people; j++) {
+    //         // process.stdout.write(graph[i][j]);
+    //         console.log(graph[i])
+    //     // }
+    //     // console.log();
+    // }
 
 
 }
@@ -57,8 +81,10 @@ const dbTest = async () => {
     let fa = await Users.fetchFriends({
         userId: u3.id
     })
-    console.dir(fa, {depth: null})
+    console.dir(fa, {
+        depth: null
+    })
 }
 
 populate()
-dbTest()
+// dbTest()
