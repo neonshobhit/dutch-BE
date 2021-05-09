@@ -12,7 +12,7 @@ exports.addUser = async (req, res) => {
 
         let newUser = await db.collection('users').add({
             email: req.body.email,
-            isVerified:false
+            isVerified: false
         })
         return {
             statusCode: 200,
@@ -31,29 +31,29 @@ exports.addUser = async (req, res) => {
         }
     }
 }
-exports.verifyUser = async (req,res)=>{
+exports.verifyUser = async (req, res) => {
     const token = req.body.otp;
-    if(otp !== token){
+    if (otp !== token) {
         return {
-            statusCode:401,
-            error:"Invlid OTP"
+            statusCode: 401,
+            error: "Invlid OTP"
         }
-    }else{
+    } else {
         let _b = req.body;
         let result;
-        await db.collection('users').doc(_b.id).set({
-                isVerified:true,
-            }).then(data=>{
+        await db.collection('users').doc(_b.id).update({
+            isVerified: true,
+        }).then(data => {
             otp = undefined;
             result = {
-                id:_b.id,
-                statusCode:200,
-                email:req.body.email,
+                id: _b.id,
+                statusCode: 200,
+                email: req.body.email,
             }
-        }).catch(err=>{
+        }).catch(err => {
             result = {
-                statusCode:400,
-                error:err.message
+                statusCode: 400,
+                error: err.message
             }
         })
         return result;
