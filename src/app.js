@@ -3,8 +3,6 @@ const {
 } = require('./config/firebase');
 
 
-
-
 const populate = async () => {
     let graph = []
     let people = 4;
@@ -45,45 +43,52 @@ const dbTest = async () => {
 
         log(input)
     }
-
     // The above section will make this log function available globally to our project
 
-
-    const Users = require('./controllers/users')
-    let u1 = await Users.add({
+    // const Users = require('./controllers/users')
+    let u1 = await Users.addUser({
         body: {
-            email: "shobhit@dutch.com"
+            email: "shob11@dutch.com"
+        }
+    });
+    // console.log(u1);
+    // let ver1 = await Users.verifyUser({
+    //     body:{
+    //         id:u1.id,
+    //         otp:u1.otp,
+    //         email:u1.newUser.email,
+    //     }
+    // })
+    // console.log(ver1)
+    let u2 = await Users.addUser({
+        body: {
+            email: "harshita@dutch.com"
         }
     })
-    console.log(u1)
-    let u2 = await Users.add({
+    u2 = await Users.addUser({
         body: {
-            email: "harshit@dutch.com"
+            id:u2.id,
+            otp:u2.otp,
+            email:u2.email,
         }
     })
     console.log(u2)
-    let u3 = await Users.add({
-        body: {
-            email: "swapnil@dutch.com"
-        }
-    })
-    console.log(u3)
     let f1 = await Users.addFriend({
         body: {
-            userId: u3.id,
-            otherUser: u2.id
+            userId: u2.id,
+            otherUser: u1.id
         },
-        userId: u3.id
+        userId: u2.id
 
     })
     console.log(f1)
 
-    let fa = await Users.fetchFriends({
-        userId: u3.id
-    })
-    console.dir(fa, {
-        depth: null
-    })
+    // let fa = await Users.fetchFriends({
+    //     userId: u3.id
+    // })
+    // console.dir(fa, {
+    //     depth: null
+    // })
 }
 
 populate()
