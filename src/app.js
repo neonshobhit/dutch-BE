@@ -42,7 +42,6 @@ const dbTest = async () => {
 
         log(input)
     }
-
     // The above section will make this log function available globally to our project
 
     let fa = await Users.fetchFriends({
