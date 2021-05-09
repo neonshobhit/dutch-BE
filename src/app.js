@@ -84,4 +84,3 @@ const dbTest = async () => {
 }
 
 populate()
-// dbTest()

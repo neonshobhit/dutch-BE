@@ -35,9 +35,10 @@ exports.addFriend = async (req, res) => {
             registered: true,
         })
         .then(snap => {
-            snap.id
+            // snap.id
             out = {
                 statusCode: 200,
+                
             }
         })
         .catch(err => {
@@ -68,7 +69,7 @@ exports.fetchFriends = async (req, res) => {
             out.statusCode = 400;
             out.error = err.message
         })
-    log(out)
+    // log(out)
 
     return out
 }
