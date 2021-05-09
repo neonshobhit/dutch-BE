@@ -1,5 +1,7 @@
 const User = require('../src/controllers/users')
-const {v4: uuid} = require('uuid')
+const {
+    v4: uuid
+} = require('uuid')
 
 test('User already added check', () => {
     return User.add({
@@ -12,13 +14,45 @@ test('User already added check', () => {
     });
 })
 
+describe("New User Added and verify otp", () => {
+    let user;
+    test("New User added", () => {
+        return Users.addUser({
+            body: {
+                email: uuid() + "@dutch.com"
+            }
+        }).then(data => {
+            user = {
+                id: data.id,
+                email: data.email,
+                otp: data.otp
+            }
+            expect(data.statusCode).toBe(200)
+        });
+    });
+
+    test("Verify User Otp", () => {
+        return Users.verifyUser({
+            body: {
+                id: user.id,
+                otp: user.otp,
+                email: user.email,
+            }
+        }).then(data => {
+            expect(data.statusCode).toBe(200)
+            expect(data.email).toBe(user.email)
+            expect(data.id).toBe(user.id)
+        })
+    })
+})
+
 test('New user is getting added', () => {
     return User.add({
         body: {
-            email:  uuid() + "@dutch.com"
+            email: uuid() + "@dutch.com"
         }
     }).then(data => {
-        expect(data.statusCode).toBe(200) 
+        expect(data.statusCode).toBe(200)
     });
 })
 
@@ -32,7 +66,7 @@ test('Check friends getting added to the user', async () => {
 
     let u2 = await User.add({
         body: {
-            email:  uuid() + "@dutch.com"
+            email: uuid() + "@dutch.com"
         }
     })
 
@@ -54,12 +88,12 @@ test('find all friends', async () => {
     })
 
     return User.fetchFriends({
-        userId: u1.id
-    })
-    .then(data => {
-        let ch = Array.isArray(data.data)
-        expect(data.statusCode).toBe(200)
-        // console.log(data.data)
-        expect(ch).toBe(true)
-    })
+            userId: u1.id
+        })
+        .then(data => {
+            let ch = Array.isArray(data.data)
+            expect(data.statusCode).toBe(200)
+            // console.log(data.data)
+            expect(ch).toBe(true)
+        })
 })

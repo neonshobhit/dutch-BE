@@ -1,19 +1,24 @@
 const {
     db
-} = require('../config/firebase')
+} = require('../config/firebase');
+var otp;
 
-exports.add = async (req, res) => {
+exports.addUser = async (req, res) => {
     let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
 
     if (snapshot.empty) {
-        let newUser = await db.collection('users').add({
-            email: req.body.email
-        })
 
+        otp = Math.floor(100000 + Math.random() * 900000);
+
+        let newUser = await db.collection('users').add({
+            email: req.body.email,
+            isVerified: false
+        })
         return {
             statusCode: 200,
             newUser: (await newUser.get()).data(),
-            id: newUser.id
+            id: newUser.id,
+            otp,
         }
 
     } else {
@@ -24,6 +29,34 @@ exports.add = async (req, res) => {
             statusCode: 403,
             error: "Email Id already exists"
         }
+    }
+}
+exports.verifyUser = async (req, res) => {
+    const token = req.body.otp;
+    if (otp !== token) {
+        return {
+            statusCode: 401,
+            error: "Invlid OTP"
+        }
+    } else {
+        let _b = req.body;
+        let result;
+        await db.collection('users').doc(_b.id).update({
+            isVerified: true,
+        }).then(data => {
+            otp = undefined;
+            result = {
+                id: _b.id,
+                statusCode: 200,
+                email: req.body.email,
+            }
+        }).catch(err => {
+            result = {
+                statusCode: 400,
+                error: err.message
+            }
+        })
+        return result;
     }
 }
 
