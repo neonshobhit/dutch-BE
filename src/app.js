@@ -2,9 +2,6 @@ const {
     db
 } = require('./config/firebase');
 
-
-
-
 const populate = async () => {
     let graph = []
     let people = 4;
