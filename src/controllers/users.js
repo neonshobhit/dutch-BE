@@ -15,7 +15,10 @@ exports.add = async (req, res) => {
 
         let newUser = await db.collection('users').add({
             email: req.body.email,
-            isVerified: false
+            isVerified: false,
+            // Cumulative of all groups for paying and receiving for this user
+            toPay: 0,
+            toReceive: 0
         })
         return {
             statusCode: 200,
@@ -64,54 +67,66 @@ exports.verifyUser = async (req, res) => {
     }
 }
 
-exports.getQrCode = async (req,res) => {
-    const {email,secret} = req.body;
+exports.getQrCode = async (req, res) => {
+    const {
+        email,
+        secret
+    } = req.body;
     let snapshot = await db.collection('users').where('email', '==', email).get();
-    if(snapshot.empty){
+    if (snapshot.empty) {
         return {
-            statusCode:401,
-            error:"Unauthorized Person"
+            statusCode: 401,
+            error: "Unauthorized Person"
         }
-    }else{
+    } else {
         // const secret = speakeasy.generateSecret();
         const qrCodeOutput = QrCodeImage(secret.otpauth_url);
-        if(qrCodeOutput.flag){
+        if (qrCodeOutput.flag) {
             return {
-                statusCode:200,
-                image_url:qrCodeOutput.url
+                statusCode: 200,
+                image_url: qrCodeOutput.url
             }
-        }else{
+        } else {
             return {
-                statusCode:500,
-                error:"Inernal Server Error"
-        }
+                statusCode: 500,
+                error: "Inernal Server Error"
+            }
         }
     }
 }
 
-exports.signin = async (req,res) => {
-    const { email,verificationOtp } = req.body;
+exports.signin = async (req, res) => {
+    const {
+        email,
+        verificationOtp
+    } = req.body;
     let snapshot = await db.collection('users').where('email', '==', email).get();
-    if(snapshot.empty){
+    if (snapshot.empty) {
         return {
-            statusCode:401,
-            error:"Unauthorized Person"
+            statusCode: 401,
+            error: "Unauthorized Person"
         }
-    }else{
-        if(verificationOtp === 345212){
+    } else {
+        if (verificationOtp === 345212) {
             let id;
             snapshot.forEach(e => id = e.id);
-            const token = jwt.sign({email,id},"DUTCHAPPLICATION@1234512132sdfsdf");
+            const token = jwt.sign({
+                email,
+                id
+            }, "DUTCHAPPLICATION@1234512132sdfsdf");
             return {
-                statusCode:200,
-                user:{email,id},
-                message:"User Signin Done.",
+                statusCode: 200,
+                user: {
+                    email,
+                    id
+                },
+                message: "User Signin Done.",
                 token
             }
-        }else{
-            return{
-                statusCode:400,
-                error:"Otp Doen't Match"
+        } else {
+            return {
+                statusCode: 400,
+                error: "Otp Doen't Match"
             }
         }
     }
@@ -120,25 +135,40 @@ exports.signin = async (req,res) => {
 exports.addFriend = async (req, res) => {
     const _b = req.body
 
-    let out
-    await db.collection('users').doc(_b.userId).collection('friends').doc(_b.otherUser).set({
-            registered: true,
-        })
-        .then(snap => {
-            // snap.id
-            out = {
-                statusCode: 200,
-                
-            }
-        })
-        .catch(err => {
-            out = {
-                statusCode: 400,
-                error: err.message
-            }
-        })
+    let checkAlreadyFriend = await db
+        .collection('users')
+        .doc(_b.userId)
+        .collection('friends')
+        .doc(_b.otherUser)
+        .get()
+    if (checkAlreadyFriend.exists) {
+        return {
+            statusCode: 208,
+            message: "Friend already added!",
+        }
+    }
 
-    return out
+    // If both are added to each other than only they'll be saved, else rollback will happen.
+    // Atomic operations.
+    const batch = db.batch();
+
+    let f12 = db.collection('users').doc(_b.userId).collection('friends').doc(_b.otherUser)
+    let f21 = db.collection('users').doc(_b.otherUser).collection('friends').doc(_b.userId)
+
+    batch.set(f12, {
+        isGuest: false,
+        owe: 0, // +ve -> userid will pay otherId, -ve -> otherId will pay userId.
+    })
+    batch.set(f21, {
+        isGuest: false,
+        owe: 0 // cumulative of all the groups where they have some relation pending
+    })
+
+    await batch.commit();
+
+    return {
+        statusCode: 200
+    }
 }
 
 exports.fetchFriends = async (req, res) => {
@@ -163,4 +193,3 @@ exports.fetchFriends = async (req, res) => {
 
     return out
 }
-
