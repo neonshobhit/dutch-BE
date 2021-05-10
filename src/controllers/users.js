@@ -3,6 +3,7 @@ const {
 } = require('../config/firebase');
 const QrCodeImage = require("../services/QRcode");
 const jwt = require("jsonwebtoken");
+const secret = require('../config/env').jwt.secret
 // const speakeasy = require("speakeasy");
 var otp;
 
@@ -113,7 +114,7 @@ exports.signin = async (req, res) => {
             const token = jwt.sign({
                 email,
                 id
-            }, "DUTCHAPPLICATION@1234512132sdfsdf");
+            }, secret);
             return {
                 statusCode: 200,
                 user: {

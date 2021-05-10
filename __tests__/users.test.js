@@ -1,4 +1,5 @@
 const Users = require("../src/controllers/users.js");
+const userMiddleware = require('../src/middleware/users')
 const {
     v4: uuid
 } = require("uuid");
@@ -163,7 +164,7 @@ describe("User Signin, Send Jwt Token and decode Jwt Token", () => {
     })
 
     test("Verify Token For A User", () => {
-        return Users1
+        return userMiddleware
             .checkValidation({
                 body: {
                     token
