@@ -144,3 +144,33 @@ describe("Check QrCode Image Url Success And Failure", () => {
             })
     })
 })
+
+describe("User Signin, Send Jwt Token and decode Jwt Token", () => {
+
+    let token = "";
+    test("User Signin", () => {
+        return Users
+            .signin({
+                body: {
+                    email: "shobhit@dutch.com",
+                    verificationOtp: 345212
+                }
+            })
+            .then(data => {
+                token = data.token
+                expect(data.statusCode).toBe(200)
+            })
+    })
+
+    test("Verify Token For A User", () => {
+        return Users1
+            .checkValidation({
+                body: {
+                    token
+                }
+            })
+            .then(data => {
+                expect(data.statusCode).toBe(200)
+            })
+    })
+})
