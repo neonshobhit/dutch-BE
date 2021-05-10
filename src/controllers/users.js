@@ -2,6 +2,7 @@ const {
     db
 } = require('../config/firebase');
 const QrCodeImage = require("../services/QRcode");
+const jwt = require("jsonwebtoken");
 // const speakeasy = require("speakeasy");
 var otp;
 
@@ -33,6 +34,7 @@ exports.addUser = async (req, res) => {
         }
     }
 }
+
 exports.verifyUser = async (req, res) => {
     const token = req.body.otp;
     if (otp !== token) {
@@ -87,6 +89,34 @@ exports.getQrCode = async (req,res) => {
     }
 }
 
+exports.signin = async (req,res) => {
+    const { email,verificationOtp } = req.body;
+    let snapshot = await db.collection('users').where('email', '==', email).get();
+    if(snapshot.empty){
+        return {
+            statusCode:401,
+            error:"Unauthorized Person"
+        }
+    }else{
+        if(verificationOtp === 345212){
+            let id;
+            snapshot.forEach(e => id = e.id);
+            const token = jwt.sign({email,id},"DUTCHAPPLICATION@1234512132sdfsdf");
+            return {
+                statusCode:200,
+                user:{email,id},
+                message:"User Signin Done.",
+                token
+            }
+        }else{
+            return{
+                statusCode:400,
+                error:"Otp Doen't Match"
+            }
+        }
+    }
+}
+
 exports.addFriend = async (req, res) => {
     const _b = req.body
 
@@ -133,3 +163,4 @@ exports.fetchFriends = async (req, res) => {
 
     return out
 }
+

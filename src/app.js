@@ -1,7 +1,7 @@
 const {
     db
 } = require('./config/firebase');
-
+const Users = require("./controllers/users");
 const populate = async () => {
     let graph = []
     let people = 4;
@@ -53,3 +53,4 @@ const dbTest = async () => {
 }
 
 populate()
+// test()

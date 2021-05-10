@@ -1,4 +1,5 @@
 const Users = require("../src/controllers/users.js");
+const Users1 = require("../src/middleware/users.js");
 const {v4:uuid} = require("uuid");
 const speakeasy = require("speakeasy");
 
@@ -117,8 +118,29 @@ describe("Check QrCode Image Url Success And Failure",()=>{
         return Users
                 .getQrCode({body:{email:"shobhit@dutch.com",secret}})
                 .then(data=>{
-                    expect(data.statusCode).toBe(500);s
+                    expect(data.statusCode).toBe(500);
                     expect(data.error).toBe("Inernal Server Error");
+                })
+    })
+})
+
+describe("User Signin, Send Jwt Token and decode Jwt Token",()=>{
+
+    let token = "";
+    test("User Signin",()=>{
+        return Users
+                .signin({body:{email:"shobhit@dutch.com",verificationOtp:345212}})
+                .then(data=>{
+                    token = data.token
+                    expect(data.statusCode).toBe(200)
+                })
+    })
+
+    test("Verify Token For A User",()=>{
+        return Users1
+                .checkValidation({body:{token}})
+                .then(data=>{
+                    expect(data.statusCode).toBe(200)
                 })
     })
 })
