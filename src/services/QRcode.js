@@ -1,4 +1,4 @@
-var QRCode = require('qrcode')
+var QRCode = require('qrcode');
 
 module.exports = function (text) {
 
@@ -11,8 +11,6 @@ module.exports = function (text) {
             out.error = err
             return;
         }
-
-        log(url)
         out.url = url
     })
 

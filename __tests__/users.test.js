@@ -1,5 +1,6 @@
 const Users = require("../src/controllers/users.js");
 const {v4:uuid} = require("uuid");
+const speakeasy = require("speakeasy");
 
 test('User Already Added Check',()=>{
     return Users
@@ -88,5 +89,36 @@ test('find all friends', async () => {
         expect(data.statusCode).toBe(200)
         // console.log(data.data)
         expect(ch).toBe(true)
+    })
+})
+
+describe("Check QrCode Image Url Success And Failure",()=>{
+
+    test("Check QrCode Image Url Success",()=>{
+        const secret = speakeasy.generateSecret();
+        return Users
+                .getQrCode({body:{email:"shobhit@dutch.com",secret}})
+                .then(data=>{
+                    expect(data.statusCode).toBe(200);
+                })
+    })
+    
+    test("Check User Not Found Error",()=>{
+        return Users
+                .getQrCode({body:{email:"@dutch.com"}})
+                .then(data=>{
+                    expect(data.statusCode).toBe(401);
+                    expect(data.error).toBe("Unauthorized Person");
+                })
+    })
+
+    test("Check Qr Code Image Failure",()=>{
+        const secret = {otpauth_url:1234567}
+        return Users
+                .getQrCode({body:{email:"shobhit@dutch.com",secret}})
+                .then(data=>{
+                    expect(data.statusCode).toBe(500);s
+                    expect(data.error).toBe("Inernal Server Error");
+                })
     })
 })

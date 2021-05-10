@@ -1,6 +1,8 @@
 const {
     db
 } = require('../config/firebase');
+const QrCodeImage = require("../services/QRcode");
+// const speakeasy = require("speakeasy");
 var otp;
 
 exports.addUser = async (req, res) => {
@@ -57,6 +59,31 @@ exports.verifyUser = async (req, res) => {
             }
         })
         return result;
+    }
+}
+
+exports.getQrCode = async (req,res) => {
+    const {email,secret} = req.body;
+    let snapshot = await db.collection('users').where('email', '==', email).get();
+    if(snapshot.empty){
+        return {
+            statusCode:401,
+            error:"Unauthorized Person"
+        }
+    }else{
+        // const secret = speakeasy.generateSecret();
+        const qrCodeOutput = QrCodeImage(secret.otpauth_url);
+        if(qrCodeOutput.flag){
+            return {
+                statusCode:200,
+                image_url:qrCodeOutput.url
+            }
+        }else{
+            return {
+                statusCode:500,
+                error:"Inernal Server Error"
+        }
+        }
     }
 }
 
