@@ -3,7 +3,7 @@ const {
 } = require('../config/firebase');
 var otp;
 
-exports.addUser = async (req, res) => {
+exports.add = async (req, res) => {
     let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
 
     if (snapshot.empty) {

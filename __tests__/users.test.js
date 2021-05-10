@@ -17,7 +17,7 @@ test('User already added check', () => {
 describe("New User Added and verify otp", () => {
     let user;
     test("New User added", () => {
-        return Users.addUser({
+        return User.add({
             body: {
                 email: uuid() + "@dutch.com"
             }
@@ -32,7 +32,7 @@ describe("New User Added and verify otp", () => {
     });
 
     test("Verify User Otp", () => {
-        return Users.verifyUser({
+        return User.verifyUser({
             body: {
                 id: user.id,
                 otp: user.otp,

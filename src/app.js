@@ -6,6 +6,7 @@ const populate = async () => {
     let graph = []
     let people = 4;
     const Activity = require('./models/Activity')
+
     {
         let dummy = []
         for (let i = 0; i < people; ++i) {
@@ -19,7 +20,7 @@ const populate = async () => {
 
     let Activityobject = new Activity(graph);
 
-    let split = [3,2,1,0]
+    let split = [3, 2, 1, 0]
     Activityobject.dutch(0, split, 100)
 
     graph = Activityobject.getGraph();
@@ -52,4 +53,34 @@ const dbTest = async () => {
     })
 }
 
-populate()
+const eventTest = async () => {
+    const Event = require('./controllers/events')
+    const {v4: uuid} = require('uuid')
+
+    // let f1 = await Event.create({
+    //     body: {
+    //         name: "Trip to Nainital",
+    //         imageURL: "http://some_url_to_image.com",
+    //         userId: 'BdJNMMHPrDV4uBRt7y5t',
+    //         userName: 'shobhit',
+    //     }
+    // })
+
+    // console.log(f1);
+
+    // let f2 = await Event.addMembers({
+    //     body: {
+    //         eventId: f1.eventId,
+    //         memberId: "G-" + uuid(), // G for guest
+    //         memberName: "Mr Guest wala",
+    //         isGuest: true
+    //     }
+    // })
+
+    // console.dir(f2, {
+    //     depth: null
+    // })
+}
+
+// populate()
+// eventTest()
