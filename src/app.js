@@ -3,27 +3,27 @@ const {
 } = require('./config/firebase');
 
 const populate = async () => {
-    let graph = []
-    let people = 4;
-    const Activity = require('./models/Activity')
+    // let graph = []
+    // let people = 4;
+    // const Activity = require('./models/Activity')
 
-    {
-        let dummy = []
-        for (let i = 0; i < people; ++i) {
-            dummy.push(0);
-        }
-        for (let i = 0; i < people; ++i) {
-            graph.push([...dummy]);
-        }
-    }
+    // {
+    //     let dummy = []
+    //     for (let i = 0; i < people; ++i) {
+    //         dummy.push(0);
+    //     }
+    //     for (let i = 0; i < people; ++i) {
+    //         graph.push([...dummy]);
+    //     }
+    // }
 
 
-    let Activityobject = new Activity(graph);
+    // let Activityobject = new Activity(graph);
 
-    let split = [3, 2, 1, 0]
-    Activityobject.dutch(0, split, 100)
+    // let split = [3, 2, 1, 0]
+    // Activityobject.dutch(0, split, 100)
 
-    graph = Activityobject.getGraph();
+    // graph = Activityobject.getGraph();
 
     // for (let i = 0; i < people; i++) {
     //     // for (let j = 0; j < people; j++) {
@@ -45,12 +45,12 @@ const dbTest = async () => {
     }
     // The above section will make this log function available globally to our project
 
-    let fa = await Users.fetchFriends({
-        userId: u3.id
-    })
-    console.dir(fa, {
-        depth: null
-    })
+    // let fa = await Users.fetchFriends({
+    //     userId: u3.id
+    // })
+    // console.dir(fa, {
+    //     depth: null
+    // })
 }
 
 const eventTest = async () => {
@@ -89,6 +89,16 @@ const eventTest = async () => {
 
     // console.log(f3)
 }
+
+// (() => {
+//     const User = require('./controllers/users')
+
+//     let f1 = await User.addFriend({
+//         body: {
+
+//         }
+//     })
+// })()
 
 // populate()
 // eventTest()
