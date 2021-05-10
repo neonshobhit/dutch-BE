@@ -1,23 +1,26 @@
-const User = require('../src/controllers/users')
+const Users = require("../src/controllers/users.js");
 const {
     v4: uuid
-} = require('uuid')
+} = require("uuid");
+const speakeasy = require("speakeasy");
 
-test('User already added check', () => {
-    return User.add({
-        body: {
-            email: "shobhit@dutch.com"
-        }
-    }).then(data => {
-        expect(data.statusCode).toBe(403)
-        expect(data.error).toBe("Email Id already exists")
-    });
-})
+test('User Already Added Check', () => {
+    return Users
+        .add({
+            body: {
+                email: "shobhit@dutch.com"
+            }
+        })
+        .then(data => {
+            expect(data.statusCode).toBe(403)
+            expect(data.error).toBe("Email Id already exists")
+        });
+});
 
 describe("New User Added and verify otp", () => {
     let user;
     test("New User added", () => {
-        return User.add({
+        return Users.add({
             body: {
                 email: uuid() + "@dutch.com"
             }
@@ -32,7 +35,7 @@ describe("New User Added and verify otp", () => {
     });
 
     test("Verify User Otp", () => {
-        return User.verifyUser({
+        return Users.verifyUser({
             body: {
                 id: user.id,
                 otp: user.otp,
@@ -46,31 +49,28 @@ describe("New User Added and verify otp", () => {
     })
 })
 
-test('New user is getting added', () => {
-    return User.add({
-        body: {
-            email: uuid() + "@dutch.com"
-        }
-    }).then(data => {
-        expect(data.statusCode).toBe(200)
-    });
-})
-
 test('Check friends getting added to the user', async () => {
 
-    let u1 = await User.add({
+    let u1 = await Users.add({
         body: {
             email: "shobhit@dutch.com"
         }
     })
 
-    let u2 = await User.add({
+    let u2 = await Users.add({
         body: {
             email: uuid() + "@dutch.com"
         }
     })
 
-    return User.addFriend({
+    u2 = await Users.verifyUser({
+        body: {
+            id: u2.id,
+            otp: u2.otp,
+            email: u2.email,
+        }
+    })
+    return Users.addFriend({
         body: {
             userId: u1.id,
             otherUser: u2.id
@@ -81,13 +81,13 @@ test('Check friends getting added to the user', async () => {
 })
 
 test('find all friends', async () => {
-    let u1 = await User.add({
+    let u1 = await Users.add({
         body: {
             email: "shobhit@dutch.com"
         }
     })
 
-    return User.fetchFriends({
+    return Users.fetchFriends({
             userId: u1.id
         })
         .then(data => {
@@ -96,4 +96,51 @@ test('find all friends', async () => {
             // console.log(data.data)
             expect(ch).toBe(true)
         })
+})
+
+describe("Check QrCode Image Url Success And Failure", () => {
+
+    test("Check QrCode Image Url Success", () => {
+        const secret = speakeasy.generateSecret();
+        return Users
+            .getQrCode({
+                body: {
+                    email: "shobhit@dutch.com",
+                    secret
+                }
+            })
+            .then(data => {
+                expect(data.statusCode).toBe(200);
+            })
+    })
+
+    test("Check User Not Found Error", () => {
+        return Users
+            .getQrCode({
+                body: {
+                    email: "@dutch.com"
+                }
+            })
+            .then(data => {
+                expect(data.statusCode).toBe(401);
+                expect(data.error).toBe("Unauthorized Person");
+            })
+    })
+
+    test("Check Qr Code Image Failure", () => {
+        const secret = {
+            otpauth_url: 1234567
+        }
+        return Users
+            .getQrCode({
+                body: {
+                    email: "shobhit@dutch.com",
+                    secret
+                }
+            })
+            .then(data => {
+                expect(data.statusCode).toBe(500);
+                expect(data.error).toBe("Inernal Server Error");
+            })
+    })
 })
