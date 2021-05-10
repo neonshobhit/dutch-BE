@@ -5,7 +5,7 @@ const QrCodeImage = require("../services/QRcode");
 // const speakeasy = require("speakeasy");
 var otp;
 
-exports.addUser = async (req, res) => {
+exports.add = async (req, res) => {
     let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
 
     if (snapshot.empty) {
