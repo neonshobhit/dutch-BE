@@ -80,6 +80,14 @@ const eventTest = async () => {
     // console.dir(f2, {
     //     depth: null
     // })
+
+    // let f3 = await Event.getDuesSummary({
+    //     body: {
+    //         eventId: 'BdvNLy84fcebL8tZt5t7'
+    //     }
+    // })
+
+    // console.log(f3)
 }
 
 // populate()

@@ -1,7 +1,4 @@
 const {
-    v4: uuid
-} = require('uuid')
-const {
     db
 } = require('../config/firebase')
 
@@ -98,4 +95,15 @@ exports.addTransaction = async (req, res) => {
 
 
     // We'll be updating values- total dues, receivables etc at few more locations, but that's some time later.
+}
+
+exports.getDuesSummary = async (req, res) => {
+    const _b = req.body
+    const ref = db.collection('events').doc(_b.eventId)
+
+    return {
+        statusCode: 200,
+        graph: (await ref.get()).data().graph
+    }
+    
 }

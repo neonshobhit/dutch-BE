@@ -41,3 +41,15 @@ describe('Events sequence', () => {
         })
     })
 })
+
+test('Get Total dues summary', () => {
+    return Event.getDuesSummary({
+        body: {
+            eventId: 'BdvNLy84fcebL8tZt5t7'
+        }
+    })
+    .then(d => {
+        expect(d.statusCode).toBe(200)
+        // expect(d.)
+    })
+})
