@@ -17,13 +17,14 @@ class Balance {
         }
 
         let x = 0
+        var i;
         for (i of balance) {
             if (i > 0) credit.push({
                 amount: i,
                 to: x
             })
             else if (i < 0) debit.push({
-                amount: i,
+                amount: -i,
                 from: x
             })
         }
@@ -32,7 +33,9 @@ class Balance {
         debit.sort((a, b) => a.amount - b.amount);
 
         this.credit = credit
-        this.debit = debits
+        this.debit = debit
+
+
     }
 
 
@@ -40,11 +43,11 @@ class Balance {
         let balance = {}
 
         for (let i = 0; i < this.credit.length; ++i) {
-            balance[this.credit[i].to] = this.credit[i].amount
+            balance[this.credit[i].to] = this.credit[i].amount;
         }
 
         for (let i = 0; i < this.debit.length; ++j) {
-            balance[this.debit[i].from] = this.debit[i].amount
+            balance[this.debit[i].from] = this.debit[i].amount;
         }
 
         return balance;
@@ -68,9 +71,11 @@ class Balance {
             }
         }
 
+        console.log(this.debit)
+
         
         while(p) {
-
+            console.log(this.debit[q-1])
             let debitamount=this.debit[q - 1].amount;
             let creditamount=this.credit[p - 1].amount;
 

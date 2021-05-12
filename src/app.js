@@ -1,29 +1,40 @@
-const {
-    db
-} = require('./config/firebase');
-const Users = require("./controllers/users");
+// const {
+//     db
+// } = require('./config/firebase');
+//const Users = require("./controllers/users");
 const populate = async () => {
-    // let graph = []
-    // let people = 4;
-    // const Activity = require('./models/Activity')
+    let graph = []
+    let people = 4;
+    const Activity = require('./models/Activity')
+    const Balance = require('./models/Balance')
 
-    // {
-    //     let dummy = []
-    //     for (let i = 0; i < people; ++i) {
-    //         dummy.push(0);
-    //     }
-    //     for (let i = 0; i < people; ++i) {
-    //         graph.push([...dummy]);
-    //     }
-    // }
+    {
+        let dummy = []
+        for (let i = 0; i < people; ++i) {
+            dummy.push(0);
+        }
+        for (let i = 0; i < people; ++i) {
+            graph.push([...dummy]);
+        }
+    }
 
 
-    // let Activityobject = new Activity(graph);
+    let Activityobject = new Activity(graph);
 
-    // let split = [3, 2, 1, 0]
-    // Activityobject.dutch(0, split, 100)
+    let split = [3, 2, 1, 0]
+    Activityobject.dutch(0, split, 100)
 
-    // graph = Activityobject.getGraph();
+    graph = Activityobject.getGraph();
+
+    let Balanceobject = new Balance(graph);
+
+    //Balanceobject.getBalance();
+
+    graph=Balanceobject.simplify();
+
+    //Balanceobject.getBalance();
+
+    console.log(graph);
 
     // for (let i = 0; i < people; i++) {
     //     // for (let j = 0; j < people; j++) {
@@ -34,28 +45,30 @@ const populate = async () => {
     // }
 
 
-}
+ }
 
-const dbTest = async () => {
-    const log = require('log-to-file')
-    global.log = (input) => {
-        if (input instanceof Object) input = JSON.stringify(input)
+ populate();
 
-        log(input)
-    }
-    // The above section will make this log function available globally to our project
+// const dbTest = async () => {
+//     const log = require('log-to-file')
+//     global.log = (input) => {
+//         if (input instanceof Object) input = JSON.stringify(input)
 
-    // let fa = await Users.fetchFriends({
-    //     userId: u3.id
-    // })
-    // console.dir(fa, {
-    //     depth: null
-    // })
-}
+//         log(input)
+//     }
+//     // The above section will make this log function available globally to our project
 
-const eventTest = async () => {
-    const Event = require('./controllers/events')
-    const {v4: uuid} = require('uuid')
+//     // let fa = await Users.fetchFriends({
+//     //     userId: u3.id
+//     // })
+//     // console.dir(fa, {
+//     //     depth: null
+//     // })
+// }
+
+// const eventTest = async () => {
+//     const Event = require('./controllers/events')
+//     const {v4: uuid} = require('uuid')
 
     // let f1 = await Event.create({
     //     body: {
@@ -88,7 +101,7 @@ const eventTest = async () => {
     // })
 
     // console.log(f3)
-}
+//}
 
 // (() => {
 //     const User = require('./controllers/users')
