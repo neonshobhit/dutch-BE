@@ -77,7 +77,7 @@ class Balance {
             let debitfrom=this.debit[q - 1].from;
             let creditto=this.credit[p - 1].to;
 
-
+            // console.log(de)
 
             if (debitamount > creditamount) {
                 let CR = creditamount
