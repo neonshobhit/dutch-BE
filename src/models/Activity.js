@@ -1,11 +1,16 @@
 class Activity {
     constructor(graph) {
+        // Assign IDs as indices for the graph. people will be a map of {index: id} to keep track of which index is assigned to which ID.
+        // Later we'll have to convert the graph from indices based to ID based.
+        this.people = graph
         // Process input graph from Database here.
         this.len = graph.length
         this.graph = graph
+        
     }
 
     getGraph() {
+        // Convert indices to user IDs
         return this.graph
     }
 

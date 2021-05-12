@@ -17,7 +17,7 @@ class Balance {
         }
 
         let x = 0
-        for (i in balance) {
+        for (i of balance) {
             if (i > 0) credit.push({
                 amount: i,
                 to: x
@@ -59,7 +59,7 @@ class Balance {
                 dummy.push(0);
             }
             for (let i = 0; i < this.credit.length + this.debit.length; ++i) {
-                graph.push(dummy);
+                graph.push([...dummy]);
             }
         }
 
