@@ -53,35 +53,50 @@ class Balance {
     simplify() {
         let graph = []
 
+
+        let p=this.credit.length;
+        let q=this.debit.length;
+
+
         {
             let dummy = []
-            for (let i = 0; i < this.credit.length + this.debit.length; ++i) {
+            for (let i = 0; i < p+q; ++i) {
                 dummy.push(0);
             }
-            for (let i = 0; i < this.credit.length + this.debit.length; ++i) {
+            for (let i = 0; i < p+q; ++i) {
                 graph.push([...dummy]);
             }
         }
 
-        while(this.credit.length) {
-            if (this.debit[this.debit.length - 1].amount > this.credit[this.credit.length - 1].amount) {
-                let CR = this.credit[this.credit.length - 1].amount
-                graph[this.debit[this.debit.length - 1].from][this.credit[this.credit.length - 1].to] = CR
-                this.debit[this.debit.length - 1].amount -= CR
+        
+        while(p) {
 
-                this.credit.pop()
-            } else if (this.debit[this.debit.length - 1].amount < this.credit[this.credit.length - 1].amount) {
-                let DR = this.debit[this.debit.length - 1].amount
-                graph[this.debit[this.debit.length - 1].from][this.credit[this.credit.length - 1].to] = DR
-                this.credit[this.credit.length - 1].amount -= DR
+            let debitamount=this.debit[q - 1].amount;
+            let creditamount=this.credit[p - 1].amount;
 
-                this.debit.pop()
+            let debitfrom=this.debit[q - 1].from;
+            let creditto=this.credit[p - 1].to;
+
+
+
+            if (debitamount > creditamount) {
+                let CR = creditamount
+                graph[debitfrom][creditto] = CR
+                debitamount -= CR
+
+                p--;
+            } else if (debitamount < creditamount) {
+                let DR = debitamount
+                graph[debitfrom][creditto] = DR
+                creditamount -= DR
+
+                q--;
             } else {
-                let DR = this.debit[this.debit.length - 1].amount
-                graph[this.debit[this.debit.length - 1].from][this.credit[this.credit.length - 1].to] = DR
+                let DR = debitamount
+                graph[debitfrom][creditto] = DR
 
-                this.credit.pop()
-                this.debit.pop()
+                p--;
+                q--;
             }
         }
 
