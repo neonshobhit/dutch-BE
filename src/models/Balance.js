@@ -11,11 +11,10 @@ class Balance {
 
         for (let i = 0; i < graph.length; ++i) {
             for (let j = 0; j < graph.length; ++j) {
-                balance[i] += graph[i][j];
-                balance[j] -= graph[i][j];
+                balance[i] -= graph[i][j];
+                balance[j] += graph[i][j];
             }
         }
-
         let x = 0
         var i;
         for (i of balance) {
@@ -24,16 +23,19 @@ class Balance {
                 to: x
             })
             else if (i < 0) debit.push({
-                amount: i,
+                amount: -i,
                 from: x
             })
+            x++;
         }
+
 
         credit.sort((a, b) => a.amount - b.amount);
         debit.sort((a, b) => a.amount - b.amount);
 
         this.credit = credit
         this.debit = debit
+
 
 
     }
@@ -70,28 +72,28 @@ class Balance {
                 graph.push([...dummy]);
             }
         }
-
+        
         
         while(p) {
 
             let debitamount=this.debit[q - 1].amount;
             let creditamount=this.credit[p - 1].amount;
 
+
             let debitfrom=this.debit[q - 1].from;
             let creditto=this.credit[p - 1].to;
-
 
 
             if (debitamount > creditamount) {
                 let CR = creditamount
                 graph[debitfrom][creditto] = CR
-                debitamount -= CR
+                this.debit[q - 1].amount -= CR
 
                 p--;
             } else if (debitamount < creditamount) {
                 let DR = debitamount
                 graph[debitfrom][creditto] = DR
-                creditamount -= DR
+                this.credit[p - 1].amount -= DR
 
                 q--;
             } else {
