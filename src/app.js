@@ -38,7 +38,7 @@ const populate = async () => {
 
  }
 
- populate();
+//  populate();
 
 // const dbTest = async () => {
 //     const log = require('log-to-file')
@@ -103,6 +103,16 @@ const populate = async () => {
 //         }
 //     })
 // })()
+
+const friends = async () => {
+    const friends = require('./controllers/friends')
+    const pays = require('./dummy data/payments').owe
+
+    const g = await friends.updateOwe(pays)
+    console.log(g);
+}
+
+// friends()
 
 // populate()
 // eventTest()
