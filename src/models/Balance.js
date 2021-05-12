@@ -24,7 +24,7 @@ class Balance {
                 to: x
             })
             else if (i < 0) debit.push({
-                amount: i,
+                amount: -i,
                 from: x
             })
         }
@@ -71,9 +71,11 @@ class Balance {
             }
         }
 
+        console.log(this.debit)
+
         
         while(p) {
-
+            console.log(this.debit[q-1])
             let debitamount=this.debit[q - 1].amount;
             let creditamount=this.credit[p - 1].amount;
 
