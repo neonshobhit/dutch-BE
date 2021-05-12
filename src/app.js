@@ -18,32 +18,23 @@ const populate = async () => {
         }
     }
 
+    // FOR TESTING
 
-    let Activityobject = new Activity(graph);
+    // let Activityobject = new Activity(graph);
 
-    let split = [3, 2, 1, 0]
-    Activityobject.dutch(0, split, 100)
+    // let split = [3, 2, 1, 0]
+    // Activityobject.dutch(0, split, 100)
 
-    graph = Activityobject.getGraph();
+    // graph = Activityobject.getGraph();
 
-    let Balanceobject = new Balance(graph);
+    // split=[1,2]
+    // Activityobject.dutch(1, split, 120)
 
-    //Balanceobject.getBalance();
+    // let Balanceobject = new Balance(graph);
 
-    graph=Balanceobject.simplify();
+    // graph=Balanceobject.simplify();
 
-    //Balanceobject.getBalance();
-
-    console.log(graph);
-
-    // for (let i = 0; i < people; i++) {
-    //     // for (let j = 0; j < people; j++) {
-    //         // process.stdout.write(graph[i][j]);
-    //         console.log(graph[i])
-    //     // }
-    //     // console.log();
-    // }
-
+    // console.log(graph);
 
  }
 
