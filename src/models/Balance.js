@@ -72,10 +72,11 @@ class Balance {
                 graph.push([...dummy]);
             }
         }
-        
+
+
         
         while(p) {
-
+            console.log(this.debit[q-1])
             let debitamount=this.debit[q - 1].amount;
             let creditamount=this.credit[p - 1].amount;
 
