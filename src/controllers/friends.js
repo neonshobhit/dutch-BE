@@ -17,9 +17,9 @@ exports.updateOwe = async (changes) => {
 
     for (let i in changes) {
         let updater = {}
+
         for (let j in changes[i]) {
             updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
-            // updater[j] = firebase.firestore.FieldValue.increment(changes[i][j])
         }
 
         batch.update(getref(i), updater);
@@ -38,22 +38,23 @@ exports.add = async (req, res) => {
 
     let doc = await getref(_b.userId)
         .get()
-
-    if (!doc.exists) {
+    // This doc will exist, even if empty... because we are initializing 
+    if (!doc.data()[_b.otherUserId] || !doc.data()[_b.otherUserId].isFriend) {
         const batch = db.batch();
 
-        batch.set(getref(_b.userId), {
-            [_b.otherUserId]: {
-                name: "Some  name",
-                owe: 0
+        const updater = (userId, otherUserId, otherUserName) => {
+            let up = {
+
             }
-        })
-        batch.set(getref(_b.otherUserId), {
-            [_b.userId]: {
-                name: "Some name",
-                owe: 0
-            }
-        })
+            up[`${otherUserId}.isFriend`] = true;
+            up[`${otherUserId}.name`] = otherUserName;
+
+            return [getref(userId), up];
+        }
+
+
+        batch.update(...updater(_b.userId, _b.otherUserId, _b.otherUserName))
+        batch.update(...updater(_b.otherUserId, _b.userId, _b.userName))
 
         await batch.commit();
 
@@ -62,33 +63,32 @@ exports.add = async (req, res) => {
         }
     }
 
-    if (!doc.data()[_b.otherUserId]) {
-
-        const batch = db.batch();
-
-        batch.update(getref(_b.userId), {
-            [_b.otherUserId]: {
-                isGuest: false,
-                owe: 0
-            }
-        })
-        batch.update(getref(_b.otherUserId), {
-            [_b.userId]: {
-                isGuest: false,
-                owe: 0
-            }
-        })
-
-        await batch.commit();
-
-        return {
-            statusCode: 200
-        }
-    }
-
 
     return {
         statusCode: 208,
         message: "Friend already added!",
+    }
+}
+
+exports.list = async (req, res) => {
+    const _b = req.body
+
+    const doc = (await db.collection('friends').doc(_b.userId).get()).data()
+
+    let friends = []
+
+    for (let i in doc) {
+        let toPush = {
+            ...doc[i],
+            id: i
+        }
+
+        delete toPush.isFriend
+        if (doc[i].isFriend) friends.push(toPush);
+    }
+
+    return {
+        statusCode: 200,
+        friends
     }
 }

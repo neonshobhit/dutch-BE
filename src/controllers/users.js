@@ -21,6 +21,11 @@ exports.add = async (req, res) => {
             toPay: 0,
             toReceive: 0
         })
+
+        // Making an empty friend document, so to maintain consistency.
+        // Not waiting because, this request can be completed even after the execution of results.
+        db.collection('friends').doc(newUser.id).set({})
+
         return {
             statusCode: 200,
             newUser: (await newUser.get()).data(),

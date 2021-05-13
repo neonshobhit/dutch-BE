@@ -1,4 +1,6 @@
-class Balance {
+const Activity = require("./Activity");
+
+class Balance extends Activity{
     constructor(graph) {
         let credit = []
         let debit = []

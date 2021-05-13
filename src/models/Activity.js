@@ -1,12 +1,27 @@
-class Activity {
-    constructor(graph) {
+const Members = require('./Members')
+class Activity extends Members{
+    constructor(members, map) {
         // Assign IDs as indices for the graph. people will be a map of {index: id} to keep track of which index is assigned to which ID.
         // Later we'll have to convert the graph from indices based to ID based.
-        this.people = graph
-        // Process input graph from Database here.
-        this.len = graph.length
-        this.graph = graph
-        
+        super(members)
+        let people = this.people
+
+        let processedGraph = this.dummyGraph
+
+
+        //  Taking Map and processing it to graph
+        for (let i in map) {
+            let i_index = people[i];
+            for (let j in map[i]) {
+                let j_index = people[j];
+                if (map[i][j] <= 0) continue;
+                processedGraph[i_index][j_index] = map[i][j]
+            }
+        }
+
+        this.graph = processedGraph
+        this.fetchedGraph = processedGraph
+
     }
 
     getGraph() {
@@ -36,7 +51,7 @@ class Activity {
 
     queryReceivable(q) {
         let receivable = {}
-        for (let i=0; i<this.len; ++i) {
+        for (let i = 0; i < this.len; ++i) {
             if (graph[q][i] === 0) continue;
 
 
@@ -46,7 +61,7 @@ class Activity {
 
     queryPayable(q) {
         let payable = {}
-        for (let i=0; i<this.len; ++i) {
+        for (let i = 0; i < this.len; ++i) {
             if (graph[i][q] === 0) continue;
 
 
