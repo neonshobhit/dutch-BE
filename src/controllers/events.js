@@ -14,7 +14,7 @@ exports.create = async (req, res) => {
         */
         graph: {
             [_b.userId]: {
-                [_b.userId]: 0
+                // [_b.userId]: 0
             }
         },
         members: [{
@@ -55,7 +55,7 @@ exports.addMembers = async (req, res) => {
 
         let graph = old.graph
         let noDueMap = {
-            [_b.memberId]: 0
+            // [_b.memberId]: 0
         }
 
         for (let x in graph) {
@@ -106,4 +106,24 @@ exports.getDuesSummary = async (req, res) => {
         graph: (await ref.get()).data().graph
     }
     
+}
+
+exports.getMembersList = async (req, res) => {
+    const _b = req.body
+    const ref = db.collection('events').doc(_b.eventId)
+
+    return {
+        statusCode: 200,
+        memebrs: (await ref.get()).data().members
+    }
+}
+
+exports.display = async (req, res) => {
+    const _b = req.body
+    const ref = db.collection('events').doc(_b.eventId)
+
+    return {
+        statusCode: 200,
+        data: (await ref.get()).data()
+    }
 }

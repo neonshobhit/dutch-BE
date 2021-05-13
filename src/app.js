@@ -49,25 +49,9 @@ const populate = async () => {
 
 //  populate();
 
-// const dbTest = async () => {
-//     const log = require('log-to-file')
-//     global.log = (input) => {
-//         if (input instanceof Object) input = JSON.stringify(input)
 
-//         log(input)
-//     }
-//     // The above section will make this log function available globally to our project
-
-//     // let fa = await Users.fetchFriends({
-//     //     userId: u3.id
-//     // })
-//     // console.dir(fa, {
-//     //     depth: null
-//     // })
-// }
-
-// const eventTest = async () => {
-//     const Event = require('./controllers/events')
+const eventTest = async () => {
+    const Event = require('./controllers/events')
 //     const {v4: uuid} = require('uuid')
 
     // let f1 = await Event.create({
@@ -94,31 +78,28 @@ const populate = async () => {
     //     depth: null
     // })
 
-    // let f3 = await Event.getDuesSummary({
-    //     body: {
-    //         eventId: 'BdvNLy84fcebL8tZt5t7'
-    //     }
-    // })
+    let f3 = await Event.display({
+        body: {
+            eventId: '70SlEscVNqcj1AyhJoWx'
+        }
+    })
 
-    // console.log(f3)
-//}
+    console.log(f3)
 
-// (() => {
-//     const User = require('./controllers/users')
+    const Activity = require('./models/Activity')
+    let Activityobject = new Activity(f3.data.members, f3.data.graph);
 
-//     let f1 = await User.addFriend({
-//         body: {
+    console.log(Activityobject.convertToMap(Activityobject.graph))
 
-//         }
-//     })
-// })()
+
+    
+}
+
 
 const friends = async () => {
     const friends = require('./controllers/friends')
     const pays = require('./dummy data/payments').owe
-
-    const g = await friends.updateOwe(pays)
-    console.log(g);
+    
 }
 
 // friends()
