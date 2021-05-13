@@ -130,7 +130,10 @@ exports.addMessageActivity = async (req,res) => {
         let entryData = {
             type:"message",
             message:{
-                sender:userInfo,
+                sender:{
+                    id:userId,
+                    email:userInfo.email
+                },
                 message:newMesssage
             }
         }
