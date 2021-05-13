@@ -99,6 +99,7 @@ const groupActivity = async ()=>{
     let feedback = await events.addMessageActivity({
             body:{
                 eventId:"51W9qZrHxb6aEBIwmiDD",
+                userId:"BdJNMMHPrDV4uBRt7y5t",
                 newMesssage:"New User is Created"
             }
         })

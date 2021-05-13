@@ -108,7 +108,6 @@ exports.getDuesSummary = async (req, res) => {
     
 }
 
-<<<<<<< HEAD
 //Add Message Activity
 exports.addMessageActivity = async (req,res) => {
     let { eventId,userId,newMesssage } = req.body;
@@ -125,40 +124,26 @@ exports.addMessageActivity = async (req,res) => {
             throw new Error("UserId is InValid");
         }
         if(!eventInfo){
-            throw new Error("Event id Invalud");
+            throw new Error("Event id Invalid");
         }
-        if(eventInfo.activity){ 
-            await event.update({
-                    activity:[{userInfo,activityType:"message",text:newMesssage},...eventInfo.activity],
-                }).then(data => {
-                    out = {
-                        statusCode:200,
-                        data
-                    }
-                }).catch(err => {
-                    out = {
-                        statusCode:500,
-                        error:"Server Error"
-                    }
-                })
-        }else{
-            await event.update({
-                    activity:[{userInfo,activityType:"message",text:newMesssage}],
-                }).then(data => {
-                    out = {
-                        statusCode:200,
-                        data
-                    }
-                }).catch(err => {
-                    out = {
-                        statusCode:500,
-                        error:"Server Error"
-                    }
-                });
+
+        let entryData = {
+            type:"message",
+            message:{
+                sender:userInfo,
+                message:newMesssage
+            }
+        }
+
+        let recordId = await db.collection("events").doc(eventId).collection("records").add(entryData);
+        out = {
+            statusCode:200,
+            recordId:recordId.id,
+            recordData: (await recordId.get()).data()
         }
     }catch(err){
-        return {
-            statusCode:500,
+        out = {
+            statusCode:400,
             error:err
         }
     }
@@ -174,36 +159,20 @@ exports.addBannerActivity = async (req,res) => {
     let out;
     try{
         if(!eventInfo){
-            throw new Error("Event id Invalud");
+            throw new Error("Event id Invalid");
         }
-        if(eventInfo.activity){ 
-            await event.update({
-                    activity:[{activityType:"Banner",text:newMesssage},...eventInfo.activity],
-                }).then(data => {
-                    out = {
-                        statusCode:200,
-                        data
-                    }
-                }).catch(err => {
-                    out = {
-                        statusCode:500,
-                        error:"Server Error"
-                    }
-                })
-        }else{
-            await event.update({
-                    activity:[{activityType:"Banner",text:newMesssage}],
-                }).then(data => {
-                    out = {
-                        statusCode:200,
-                        data
-                    }
-                }).catch(err => {
-                    out = {
-                        statusCode:500,
-                        error:"Server Error"
-                    }
-                });
+
+        let entryData = {
+            type:"banner",
+            message:{
+                message:newMesssage
+            }
+        }
+        let recordId = await db.collection("events").doc(eventId).collection("records").add(entryData);
+        out = {
+            statusCode:200,
+            recordId:recordId.id,
+            recordData: (await recordId.get()).data()
         }
     }catch(err){
         return {
@@ -213,7 +182,7 @@ exports.addBannerActivity = async (req,res) => {
     }
     return out;
 }
-=======
+
 exports.getMembersList = async (req, res) => {
     const _b = req.body
     const ref = db.collection('events').doc(_b.eventId)
@@ -233,4 +202,3 @@ exports.display = async (req, res) => {
         data: (await ref.get()).data()
     }
 }
->>>>>>> 93b03e83b031126d15f021e02e63b62a41558462
