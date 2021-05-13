@@ -93,18 +93,57 @@ const friends = async () => {
     
 }
 
-
 const groupActivity = async ()=>{
     let events = require("./controllers/events");  
-    let feedback = await events.addMessageActivity({
-            body:{
-                eventId:"51W9qZrHxb6aEBIwmiDD",
-                userId:"BdJNMMHPrDV4uBRt7y5t",
-                newMesssage:"New User is Created"
-            }
-        })
-    console.log(feedback);
+    // let feedback = await events.addMessageActivity({
+    //         body:{
+    //             eventId:"51W9qZrHxb6aEBIwmiDD",
+    //             userId:"BdJNMMHPrDV4uBRt7y5t",
+    //             newMesssage:"New User is Created"
+    //         }
+    //     })
+    // console.log(feedback);
+
+    let tr = {
+        event:{
+            id:"51W9qZrHxb6aEBIwmiDD",
+            name:"Trip to Nainital"
+        },
+        payment : {
+            from: {
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit"
+            },
+            to: {
+                id: "G-2121341e-c762-4808-ae08-3154aa477fed",
+                name: "Mr Guest wala",
+            },
+            amount: 1000
+        },
+
+        share : {
+            splitIn: [{
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit"
+            }, {
+                id: "G-2121341e-c762-4808-ae08-3154aa477fed",
+                name: "Mr Guest wala"
+            }],
+
+            paidBy: [{
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit",
+                amount: 1000
+            }]
+        }
+    };
+
+    let transaction =  await events.addTransaction({
+        body:tr
+    })
+    console.log(transaction);
 }
+
 // friends()
 
 // populate()

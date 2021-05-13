@@ -77,4 +77,47 @@ describe("Various Event Activity Testing",()=>{
                 expect(data.statusCode).toBe(200);
             })
     })
+    
+
+    let tr = {
+        event:{
+            id:"51W9qZrHxb6aEBIwmiDD",
+            name:"Trip to Nainital"
+        },
+        payment : {
+            from: {
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit"
+            },
+            to: {
+                id: "G-2121341e-c762-4808-ae08-3154aa477fed",
+                name: "Mr Guest wala",
+            },
+            amount: 1000
+        },
+
+        share : {
+            splitIn: [{
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit"
+            }, {
+                id: "G-2121341e-c762-4808-ae08-3154aa477fed",
+                name: "Mr Guest wala"
+            }],
+
+            paidBy: [{
+                id: "BdJNMMHPrDV4uBRt7y5t",
+                name: "shobhit",
+                amount: 1000
+            }]
+        }
+    };
+
+    test("Transaction Activity is Added",()=>{
+        return Event.addTransaction({
+            body:tr
+            }).then(data=>{
+                expect(data.statusCode).toBe(200);
+            })
+    })
 })
