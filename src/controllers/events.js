@@ -22,13 +22,13 @@ exports.create = async (req, res) => {
             name: _b.userName,
             isGuest: false
         }],
+        Activties:[]
     })
 
     let tr = await db.collection('events').doc(ev.id).collection('records').add({
         message: 'Event created',
         userId: null,
         tag: true,
-
     })
 
     return {
@@ -106,4 +106,109 @@ exports.getDuesSummary = async (req, res) => {
         graph: (await ref.get()).data().graph
     }
     
+}
+
+//Add Message Activity
+exports.addMessageActivity = async (req,res) => {
+    let { eventId,userId,newMesssage } = req.body;
+
+    let event = await db.collection("events").doc(eventId);
+    let eventInfo = (await event.get()).data();
+
+    let user = await db.collection("users").doc(userId);
+    let userInfo = (await user.get()).data();
+
+    let out;
+    try{
+        if(!userInfo){
+            throw new Error("UserId is InValid");
+        }
+        if(!eventInfo){
+            throw new Error("Event id Invalud");
+        }
+        if(eventInfo.activity){ 
+            await event.update({
+                    activity:[{userInfo,activityType:"message",text:newMesssage},...eventInfo.activity],
+                }).then(data => {
+                    out = {
+                        statusCode:200,
+                        data
+                    }
+                }).catch(err => {
+                    out = {
+                        statusCode:500,
+                        error:"Server Error"
+                    }
+                })
+        }else{
+            await event.update({
+                    activity:[{userInfo,activityType:"message",text:newMesssage}],
+                }).then(data => {
+                    out = {
+                        statusCode:200,
+                        data
+                    }
+                }).catch(err => {
+                    out = {
+                        statusCode:500,
+                        error:"Server Error"
+                    }
+                });
+        }
+    }catch(err){
+        return {
+            statusCode:500,
+            error:err
+        }
+    }
+    return out;
+}
+
+exports.addBannerActivity = async (req,res) => {
+    let { eventId,newMesssage } = req.body;
+
+    let event = await db.collection("events").doc(eventId);
+    let eventInfo = (await event.get()).data();
+
+    let out;
+    try{
+        if(!eventInfo){
+            throw new Error("Event id Invalud");
+        }
+        if(eventInfo.activity){ 
+            await event.update({
+                    activity:[{activityType:"Banner",text:newMesssage},...eventInfo.activity],
+                }).then(data => {
+                    out = {
+                        statusCode:200,
+                        data
+                    }
+                }).catch(err => {
+                    out = {
+                        statusCode:500,
+                        error:"Server Error"
+                    }
+                })
+        }else{
+            await event.update({
+                    activity:[{activityType:"Banner",text:newMesssage}],
+                }).then(data => {
+                    out = {
+                        statusCode:200,
+                        data
+                    }
+                }).catch(err => {
+                    out = {
+                        statusCode:500,
+                        error:"Server Error"
+                    }
+                });
+        }
+    }catch(err){
+        return {
+            statusCode:500,
+            error:err
+        }
+    }
+    return out;
 }

@@ -53,3 +53,28 @@ test('Get Total dues summary', () => {
         // expect(d.)
     })
 })
+describe("Various Event Activity Testing",()=>{
+
+    test("Message Activity is Added",()=>{
+        return Event.addMessageActivity({
+            body:{
+                    eventId:"51W9qZrHxb6aEBIwmiDD",
+                    userId: "BdJNMMHPrDV4uBRt7y5t",
+                    newMesssage:"Added More Task to Complete"
+                }
+            }).then(data=>{
+                expect(data.statusCode).toBe(200);
+            })
+    })
+
+    test("Banner Activity is Added",()=>{
+        return Event.addBannerActivity({
+            body:{
+                    eventId:"51W9qZrHxb6aEBIwmiDD",
+                    newMesssage:"New User is Created"
+                }
+            }).then(data=>{
+                expect(data.statusCode).toBe(200);
+            })
+    })
+})

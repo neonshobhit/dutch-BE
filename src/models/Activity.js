@@ -67,7 +67,6 @@ class Activity {
 
         return dues;
     }
-
 }
 
-module.exports = Activity
+module.exports = Activity;

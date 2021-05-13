@@ -36,7 +36,7 @@ const populate = async () => {
 
     // console.log(graph);
 
- }
+}
 
 //  populate();
 
@@ -112,7 +112,20 @@ const friends = async () => {
     console.log(g);
 }
 
+
+const groupActivity = async ()=>{
+    let events = require("./controllers/events");  
+    let feedback = await events.addMessageActivity({
+            body:{
+                eventId:"51W9qZrHxb6aEBIwmiDD",
+                newMesssage:"New User is Created"
+            }
+        })
+    console.log(feedback);
+}
 // friends()
 
 // populate()
 // eventTest()
+
+// groupActivity();
