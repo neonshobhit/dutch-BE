@@ -82,7 +82,6 @@ class Activity extends Members{
 
         return dues;
     }
-
 }
 
-module.exports = Activity
+module.exports = Activity;

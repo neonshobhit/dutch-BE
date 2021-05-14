@@ -22,13 +22,13 @@ exports.create = async (req, res) => {
             name: _b.userName,
             isGuest: false
         }],
+        Activties:[]
     })
 
     let tr = await db.collection('events').doc(ev.id).collection('records').add({
         message: 'Event created',
         userId: null,
         tag: true,
-
     })
 
     return {
@@ -84,17 +84,42 @@ exports.addMembers = async (req, res) => {
 }
 
 exports.addTransaction = async (req, res) => {
-    // 1st assign a reference to the document
-    // run a DB transaction (See addMembers function)
-    // take graph
-    // Use consructor to parse it, and store ids and indices
-    // Call the dutch function
-    // Pass the graph to Balance simplication
-    // Convert indices to original IDs
-    // update the graph
+    let tr = req.body;
+    let event = await db.collection("events").doc(tr.event.id);
+    let eventInfo = (await event.get()).data();
 
+    let out;
+    try{
+        if(!eventInfo)
+            throw new Error("Event id Invalid");
+        let entryData = {
+            type:"transaction",
+            event:{
+                id:tr.event.id,
+                name:tr.event.name
+            }
+        };
+        if(tr.payment){
+            entryData["payment"] = tr.payment;
+        }
+        if(tr.share){
+            entryData["share"] = tr.share;
+        }
 
-    // We'll be updating values- total dues, receivables etc at few more locations, but that's some time later.
+        let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
+
+        return {
+            statusCode:200,
+            id:recordId.id,
+            data:entryData
+        }
+    }catch(err){
+        out = {
+            statusCode:400,
+            error:err
+        }
+    }
+    return out;
 }
 
 exports.getDuesSummary = async (req, res) => {
@@ -107,6 +132,85 @@ exports.getDuesSummary = async (req, res) => {
     }
     
 }
+
+//Add Message Activity
+exports.addMessageActivity = async (req,res) => {
+    let { eventId,userId,newMesssage } = req.body;
+
+    let event = await db.collection("events").doc(eventId);
+    let eventInfo = (await event.get()).data();
+
+    let user = await db.collection("users").doc(userId);
+    let userInfo = (await user.get()).data();
+
+    let out;
+    try{
+        if(!userInfo){
+            throw new Error("UserId is InValid");
+        }
+        if(!eventInfo){
+            throw new Error("Event id Invalid");
+        }
+
+        let entryData = {
+            type:"message",
+            message:{
+                sender:{
+                    id:userId,
+                    email:userInfo.email
+                },
+                message:newMesssage
+            }
+        }
+
+        let recordId = await db.collection("events").doc(eventId).collection("records").add(entryData);
+        out = {
+            statusCode:200,
+            recordId:recordId.id,
+            recordData: (await recordId.get()).data()
+        }
+    }catch(err){
+        out = {
+            statusCode:400,
+            error:err
+        }
+    }
+    return out;
+}
+
+exports.addBannerActivity = async (req,res) => {
+    let { eventId,newMesssage } = req.body;
+
+    let event = await db.collection("events").doc(eventId);
+    let eventInfo = (await event.get()).data();
+
+    let out;
+    try{
+        if(!eventInfo){
+            throw new Error("Event id Invalid");
+        }
+
+        let entryData = {
+            type:"banner",
+            message:{
+                message:newMesssage
+            }
+        }
+        let recordId = await db.collection("events").doc(eventId).collection("records").add(entryData);
+        out = {
+            statusCode:200,
+            recordId:recordId.id,
+            recordData: (await recordId.get()).data()
+        }
+    }catch(err){
+        return {
+            statusCode:500,
+            error:err
+        }
+    }
+    return out;
+}
+
 
 exports.getMembersList = async (req, res) => {
     const _b = req.body
