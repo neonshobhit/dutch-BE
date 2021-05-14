@@ -29,23 +29,26 @@ class Activity extends Members {
         return this.graph
     }
 
-    dutch(paidBy, splitIn, amount) {
-        let len = splitIn.length
-        let share = parseFloat((amount / len).toPrecision(2))
+    dutch(transaction) {
+        let len = transaction.splitIn.length
+        for(let members of transaction.contribution)
+        {
+            let share = parseFloat((members.amount / len).toPrecision(2))
 
-        for (let owedBy of splitIn) {
-            if (owedBy === paidBy) continue;
+            for (let owedBy of transaction.splitIn) {
+                if (owedBy === members.paidBy) continue;
 
-            let toPay = share;
+                let toPay = share;
 
-            let due = this.graph[paidBy][owedBy]
-            let contribute = Math.min(due, share);
+                let due = this.graph[members.paidBy][owedBy]
+                let contribute = Math.min(due, share);
 
-            this.graph[paidBy][owedBy] -= contribute
-            toPay -= contribute;
+                this.graph[members.paidBy][owedBy] -= contribute
+                toPay -= contribute;
 
-            this.graph[owedBy][paidBy] += toPay;
+                this.graph[owedBy][members.paidBy] += toPay;
 
+            }
         }
     }
 
@@ -82,7 +85,6 @@ class Activity extends Members {
 
         return dues;
     }
-
 }
 
-module.exports = Activity
+module.exports = Activity;

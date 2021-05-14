@@ -1,11 +1,15 @@
 module.exports = {
     code: 'PR', // Payment Received. or PayR: Payment Recorded. or anything else.
-    // It can help FE know what kind ofrecord it is. Can be integers also. Need to document well about the meaning of each code.
+    // It can help FE know what kind of record it is. Can be integers also. Need to document well about the meaning of each code.
     record: {
         id: "RecordId",
         title: "Title of that event. If null, FE will handle",
     },
-    payment ? : {
+    event: {
+        id: "EventId",
+        name: "Event Name",
+    },
+    payment ?: {
         from: {
             id: "fromUserId",
             name: "Some name"
@@ -16,7 +20,7 @@ module.exports = {
         },
         amount: 1000
     },
-    share ? : {
+    share ?: {
         splitIn: [{
             id: "userid",
             name: "name"
