@@ -31,3 +31,16 @@ exports.owe = {
         c: -14
     }
 }
+
+exports.updateOwe = {
+    "id1": {
+        "id2": 10,
+        "id3": 20,
+    },
+    "id2": {
+        "id1": -10,
+    }, 
+    "id3": {
+        "id1": -20
+    }
+}

@@ -5,10 +5,6 @@ module.exports = {
         id: "RecordId",
         title: "Title of that event. If null, FE will handle",
     },
-    event: {
-        id: "EventId",
-        name: "Event Name",
-    },
     payment ? : {
         from: {
             id: "fromUserId",
