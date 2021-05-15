@@ -1,10 +1,10 @@
 exports.transaction = {
-    splitIn: ['userId1', 'userId2', 'userId3'],
+    splitIn: [0, 1],
     contribution: [{
-        paidBy: 'userId1',
+        paidBy: 0,
         amount: 100
     }, {
-        paidBy: 'userId2',
+        paidBy: 1,
         amount: 10
     }]
 }

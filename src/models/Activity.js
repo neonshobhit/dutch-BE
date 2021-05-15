@@ -31,7 +31,8 @@ class Activity extends Members {
     getoldgraph() {
 
         // create new graph and assign it values before transacion
-        let graph =[]
+        let graph = []
+
         {
             let dummy = []
             for (let i = 0; i < 2; ++i) {
@@ -42,12 +43,10 @@ class Activity extends Members {
             }
         }
 
-        let sz=this.graph.length;
-        for(let i=0;i<sz;i++)
-        {
-            for(let j=0;j<sz;j++)
-            {
-                graph[i][j]=this.graph[i][j];
+        let sz = this.graph.length;
+        for (let i = 0; i < sz; i++) {
+            for (let j = 0; j < sz; j++) {
+                graph[i][j] = this.graph[i][j];
             }
         }
         return graph;
@@ -77,22 +76,20 @@ class Activity extends Members {
     }
 
 
-    calculatechanges(oldgraph,newgraph){
+    calculatechanges(oldgraph, newgraph) {
 
-        let changegraph=oldgraph;
-        let sz=changegraph.length;
+        let changegraph = oldgraph;
+        let sz = changegraph.length;
 
-        for(let i=0;i<sz;i++)
-        {
-            for(let j=0;j<sz;j++)
-            {
-                changegraph[i][j]=newgraph[i][j]-oldgraph[i][j];
+        for (let i = 0; i < sz; i++) {
+            for (let j = 0; j < sz; j++) {
+                changegraph[i][j] = newgraph[i][j] - oldgraph[i][j];
             }
         }
 
 
         return changegraph;
-        
+
     }
     queryReceivable(q) {
         let receivable = {}
@@ -126,7 +123,7 @@ class Activity extends Members {
         }
 
         return dues;
-    }   
+    }
 }
 
 module.exports = Activity;
