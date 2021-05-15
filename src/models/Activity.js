@@ -31,8 +31,7 @@ class Activity extends Members {
 
     dutch(transaction) {
         let len = transaction.splitIn.length
-        for(let members of transaction.contribution)
-        {
+        for (let members of transaction.contribution) {
             let share = parseFloat((members.amount / len).toPrecision(2))
 
             for (let owedBy of transaction.splitIn) {
