@@ -1,6 +1,6 @@
 const Activity = require("./Activity");
 
-class Balance extends Activity{
+class Balance{
     constructor(graph) {
         let credit = []
         let debit = []
@@ -78,7 +78,6 @@ class Balance extends Activity{
 
         
         while(p) {
-            console.log(this.debit[q-1])
             let debitamount=this.debit[q - 1].amount;
             let creditamount=this.credit[p - 1].amount;
 

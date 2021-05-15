@@ -1,44 +1,52 @@
-// const {
-//     db
-// } = require('./config/firebase');
+const {
+    db
+} = require('./config/firebase');
+
+const  {transaction}  = require('./dummy data/payments');
+
 //const Users = require("./controllers/users");
 const populate = async () => {
-    let graph = []
-    let people = 4;
     const Activity = require('./models/Activity')
     const Balance = require('./models/Balance')
+    const {updateOwe}=  require('./controllers/friends')
+    
 
-    {
-        let dummy = []
-        for (let i = 0; i < people; ++i) {
-            dummy.push(0);
-        }
-        for (let i = 0; i < people; ++i) {
-            graph.push([...dummy]);
-        }
-    }
+    // FOR TRANSACTION
 
-    // FOR TESTING
+    //const ref = db.collection('events').doc('70SlEscVNqcj1AyhJoWx');
+    //data = (await ref.get()).data();
 
-    // let Activityobject = new Activity(graph);
 
-    // let split = [3, 2, 1, 0]
-    // Activityobject.dutch(0, split, 100)
+     let Activityobject = new Activity(data.members,data.graph);   // creating object
 
-    // graph = Activityobject.getGraph();
+     let oldgraph=Activityobject.getoldgraph();                     // getting stored graph
 
-    // split=[1,2]
-    // Activityobject.dutch(1, split, 120)
+     //console.log(oldgraph);
 
-    // let Balanceobject = new Balance(graph);
+      Activityobject.dutch(transaction);                            //making transaction
 
-    // graph=Balanceobject.simplify();
+      let newgraph=Activityobject.getGraph();                       // newgraph after transaction
 
-    // console.log(graph);
+      //console.log(newgraph);
+
+      let Balanceobject = new Balance(newgraph);                    //for simplification
+
+      newgraph=Balanceobject.simplify();                        
+
+      //console.log(newgraph);
+
+      let graph=Activityobject.calculatechanges(oldgraph,newgraph);   //calculating changes
+
+      map=Activityobject.convertToMap(graph);                           // map to graph for writing in database
+
+        updateOwe(map);                                                 //updating changes in database 
+
+
+     //console.log(graph);
 
 }
 
-//  populate();
+  //populate();
 
 
 const eventTest = async () => {
