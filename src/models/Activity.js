@@ -1,5 +1,5 @@
 const Members = require('./Members')
-class Activity extends Members{
+class Activity extends Members {
     constructor(members, map) {
         // Assign IDs as indices for the graph. people will be a map of {index: id} to keep track of which index is assigned to which ID.
         // Later we'll have to convert the graph from indices based to ID based.
