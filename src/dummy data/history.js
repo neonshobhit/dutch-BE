@@ -26,7 +26,7 @@ module.exports = {
             name: "name"
         }, {
             id: "G-bf1ff89a-363e-48d4-9b04-38ba6bbac81d",
-            name: "nameee"
+            name: "name"
         }],
 
         paidBy: [{
