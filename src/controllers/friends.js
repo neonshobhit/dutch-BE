@@ -9,9 +9,7 @@ const getref = (id) => {
         .doc(id)
 }
 
-// They must be friends with each other.
-// The function will fail if even 1 isn't a friend of other.
-// 
+
 exports.updateOwe = async (changes) => {
     const batch = db.batch()
 

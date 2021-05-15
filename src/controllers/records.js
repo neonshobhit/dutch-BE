@@ -1,12 +1,56 @@
 const {
-    db
+    db,
+    firebase
 } = require('../config/firebase')
 
+const updateOwe = (changes, batch) => {
+
+    let getref = (i) => db.collection('friends').doc(i)
+    for (let i in changes) {
+        let updater = {}
+
+        for (let j in changes[i]) {
+            updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
+        }
+
+        batch.update(getref(i), updater);
+    }
+}
+
+const updateEventDoc = (id, batch) => {
+    let eventRef = db.collection("events").doc(id);
+    batch.update(eventRef, {
+        graph: {
+
+        },
+        stats: {
+            expenditure: firebase.firestore.FieldValue.increment(0),
+            share: {
+                "a": firebase.firestore.FieldValue.increment(0),
+            }
+        }
+    })
+}
+
+const updateUserDoc = (changes, batch) => {
+    let getref = (i) => db.collection('users').doc(i)
+    for (let i in changes) {
+        if (changes[i] > 0) {
+            batch.update(getref(i), {
+                toReceive: firebase.firestore.FieldValue.increment(changes[i]),
+            })
+        } else {
+            batch.update(getref(i), {
+                toPay: firebase.firestore.FieldValue.increment(-changes[i]), // storing only +ve values
+            })
+        }
+    }
+}
 
 exports.addTransaction = async (req, res) => {
     let tr = req.body;
-    let event = db.collection("events").doc(tr.event.id);
-    let eventInfo = (await event.get()).data();
+    let eventRef = db.collection("events").doc(tr.event.id);
+    let eventInfo = (await eventRef.get()).data();
 
     let out;
     try {
@@ -28,14 +72,18 @@ exports.addTransaction = async (req, res) => {
         // 2. Update graph in event
         // 3. Write changes in friends payable/receivables
         // 4. Write in user profiles
+        // 5. Increase total Expenditure
+        // 6. Increase per involved user's share
 
         const recordRef = db.collection("events").doc(tr.event.id).collection("records").doc()
-        const eventRef = db.collection("events").doc(tr.event.id)
 
 
         const batch = db.batch()
 
-        batch.create(recordRef, entryData)
+        batch.create(recordRef, entryData) // 1
+        updateOwe({}, batch); // 3. Remaining to pass changes map
+        updateEventDoc(eventRef, batch) // 2., 5., 6. Remaining to pass data
+        updateUserDoc({}, batch); // 4.
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
 
