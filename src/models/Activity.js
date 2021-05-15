@@ -8,7 +8,6 @@ class Activity extends Members{
 
         let processedGraph = this.dummyGraph
 
-
         //  Taking Map and processing it to graph
         for (let i in map) {
             let i_index = people[i];
@@ -28,6 +27,32 @@ class Activity extends Members{
         // Convert indices to user IDs
         return this.graph
     }
+
+    getoldgraph() {
+
+        // create new graph and assign it values before transacion
+        let graph =[]
+        {
+            let dummy = []
+            for (let i = 0; i < 2; ++i) {
+                dummy.push(0);
+            }
+            for (let i = 0; i < 2; ++i) {
+                graph.push([...dummy]);
+            }
+        }
+
+        let sz=this.graph.length;
+        for(let i=0;i<sz;i++)
+        {
+            for(let j=0;j<sz;j++)
+            {
+                graph[i][j]=this.graph[i][j];
+            }
+        }
+        return graph;
+    }
+
 
     dutch(transaction) {
         let len = transaction.splitIn.length
@@ -52,6 +77,24 @@ class Activity extends Members{
         }
     }
 
+
+    calculatechanges(oldgraph,newgraph){
+
+        let changegraph=oldgraph;
+        let sz=changegraph.length;
+
+        for(let i=0;i<sz;i++)
+        {
+            for(let j=0;j<sz;j++)
+            {
+                changegraph[i][j]=newgraph[i][j]-oldgraph[i][j];
+            }
+        }
+
+
+        return changegraph;
+        
+    }
     queryReceivable(q) {
         let receivable = {}
         for (let i = 0; i < this.len; ++i) {
@@ -84,7 +127,7 @@ class Activity extends Members{
         }
 
         return dues;
-    }
+    }   
 }
 
 module.exports = Activity;
