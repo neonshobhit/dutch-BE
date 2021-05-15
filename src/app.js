@@ -1,49 +1,63 @@
-// const {
-//     db
-// } = require('./config/firebase');
+const {
+    db
+} = require('./config/firebase');
+
+const {
+    transaction
+} = require('./dummy data/payments');
+
 //const Users = require("./controllers/users");
 const populate = async () => {
-    let graph = []
-    let people = 4;
     const Activity = require('./models/Activity')
     const Balance = require('./models/Balance')
+    const {
+        updateOwe
+    } = require('./controllers/friends')
 
-    {
-        let dummy = []
-        for (let i = 0; i < people; ++i) {
-            dummy.push(0);
-        }
-        for (let i = 0; i < people; ++i) {
-            graph.push([...dummy]);
-        }
-    }
 
-    // FOR TESTING
+    // FOR TRANSACTION
 
-    // let Activityobject = new Activity(graph);
+    const ref = db.collection('events').doc('70SlEscVNqcj1AyhJoWx');
+    let data = (await ref.get()).data();
 
-    // let split = [3, 2, 1, 0]
-    // Activityobject.dutch(0, split, 100)
+    // console.log(data)
 
-    // graph = Activityobject.getGraph();
 
-    // split=[1,2]
-    // Activityobject.dutch(1, split, 120)
+    let Activityobject = new Activity(data.members, data.graph); // creating object
 
-    // let Balanceobject = new Balance(graph);
+    let oldgraph = Activityobject.getoldgraph(); // getting stored graph
 
-    // graph=Balanceobject.simplify();
+    //console.log(oldgraph);
 
-    // console.log(graph);
+    Activityobject.dutch(transaction); //making transaction
+
+    let newgraph = Activityobject.getGraph(); // newgraph after transaction
+
+    //console.log(newgraph);
+
+    let Balanceobject = new Balance(newgraph); //for simplification
+
+    newgraph = Balanceobject.simplify();
+
+    //console.log(newgraph);
+
+    let graph = Activityobject.calculatechanges(oldgraph, newgraph); //calculating changes
+
+    map = Activityobject.convertToMap(graph); // map to graph for writing in database
+
+    updateOwe(map); //updating changes in database 
+
+
+    //console.log(graph);
 
 }
 
-//  populate();
+//populate();
 
 
 const eventTest = async () => {
     const Event = require('./controllers/events')
-//     const {v4: uuid} = require('uuid')
+    //     const {v4: uuid} = require('uuid')
 
     // let f1 = await Event.create({
     //     body: {
@@ -83,18 +97,18 @@ const eventTest = async () => {
     console.log(Activityobject.convertToMap(Activityobject.graph))
 
 
-    
+
 }
 
 
 const friends = async () => {
     const friends = require('./controllers/friends')
     const pays = require('./dummy data/payments').owe
-    
+
 }
 
-const groupActivity = async ()=>{
-    let events = require("./controllers/events");  
+const groupActivity = async () => {
+    let events = require("./controllers/events");
     // let feedback = await events.addMessageActivity({
     //         body:{
     //             eventId:"51W9qZrHxb6aEBIwmiDD",
@@ -105,11 +119,11 @@ const groupActivity = async ()=>{
     // console.log(feedback);
 
     let tr = {
-        event:{
-            id:"51W9qZrHxb6aEBIwmiDD",
-            name:"Trip to Nainital"
+        event: {
+            id: "51W9qZrHxb6aEBIwmiDD",
+            name: "Trip to Nainital"
         },
-        payment : {
+        payment: {
             from: {
                 id: "BdJNMMHPrDV4uBRt7y5t",
                 name: "shobhit"
@@ -121,7 +135,7 @@ const groupActivity = async ()=>{
             amount: 1000
         },
 
-        share : {
+        share: {
             splitIn: [{
                 id: "BdJNMMHPrDV4uBRt7y5t",
                 name: "shobhit"
@@ -138,8 +152,8 @@ const groupActivity = async ()=>{
         }
     };
 
-    let transaction =  await events.addTransaction({
-        body:tr
+    let transaction = await events.addTransaction({
+        body: tr
     })
     console.log(transaction);
 }

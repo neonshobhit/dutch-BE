@@ -1,10 +1,10 @@
 exports.transaction = {
-    splitIn: ['userId1', 'userId2', 'userId3'],
+    splitIn: [0, 1],
     contribution: [{
-        paidBy: 'userId1',
+        paidBy: 0,
         amount: 100
     }, {
-        paidBy: 'userId2',
+        paidBy: 1,
         amount: 10
     }]
 }
@@ -29,5 +29,18 @@ exports.owe = {
         a: -12,
         b: -13,
         c: -14
+    }
+}
+
+exports.updateOwe = {
+    "id1": {
+        "id2": 10,
+        "id3": 20,
+    },
+    "id2": {
+        "id1": -10,
+    }, 
+    "id3": {
+        "id1": -20
     }
 }
