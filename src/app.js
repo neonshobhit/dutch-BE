@@ -2,7 +2,7 @@ const {
     db
 } = require('./config/firebase');
 
-const  {transaction}  = require('./dummy data/payments');
+const  {share}  = require('./dummy data/history');
 
 //const Users = require("./controllers/users");
 const populate = async () => {
@@ -13,8 +13,8 @@ const populate = async () => {
 
     // FOR TRANSACTION
 
-    //const ref = db.collection('events').doc('70SlEscVNqcj1AyhJoWx');
-    //data = (await ref.get()).data();
+    const ref = db.collection('events').doc('70SlEscVNqcj1AyhJoWx');
+    data = (await ref.get()).data();
 
 
      let Activityobject = new Activity(data.members,data.graph);   // creating object
@@ -23,7 +23,7 @@ const populate = async () => {
 
      //console.log(oldgraph);
 
-      Activityobject.dutch(transaction);                            //making transaction
+      Activityobject.dutch(share);                            //making transaction
 
       let newgraph=Activityobject.getGraph();                       // newgraph after transaction
 
@@ -46,7 +46,7 @@ const populate = async () => {
 
 }
 
-  //populate();
+  populate();
 
 
 const eventTest = async () => {

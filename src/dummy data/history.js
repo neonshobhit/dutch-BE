@@ -9,7 +9,7 @@ module.exports = {
         id: "EventId",
         name: "Event Name",
     },
-    payment ?: {
+    payment : {
         from: {
             id: "fromUserId",
             name: "Some name"
@@ -20,21 +20,21 @@ module.exports = {
         },
         amount: 1000
     },
-    share ?: {
+    share : {
         splitIn: [{
-            id: "userid",
+            id: "BdJNMMHPrDV4uBRt7y5t",
             name: "name"
         }, {
-            id: "user2Id",
+            id: "G-bf1ff89a-363e-48d4-9b04-38ba6bbac81d",
             name: "nameee"
         }],
 
         paidBy: [{
-            id: "user1id",
+            id: "BdJNMMHPrDV4uBRt7y5t",
             name: "name",
-            amount: 200
+            amount: 100
         }, {
-            id: "user2id",
+            id: "G-bf1ff89a-363e-48d4-9b04-38ba6bbac81d",
             name: "name",
             amount: 200
         }]

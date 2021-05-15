@@ -32,17 +32,18 @@ class Activity extends Members {
 
         // create new graph and assign it values before transacion
         let graph =[]
+        let sz=this.graph.length;
         {
             let dummy = []
-            for (let i = 0; i < 2; ++i) {
+            for (let i = 0; i < sz; ++i) {
                 dummy.push(0);
             }
-            for (let i = 0; i < 2; ++i) {
+            for (let i = 0; i < sz; ++i) {
                 graph.push([...dummy]);
             }
         }
 
-        let sz=this.graph.length;
+       
         for(let i=0;i<sz;i++)
         {
             for(let j=0;j<sz;j++)
@@ -56,22 +57,22 @@ class Activity extends Members {
 
     dutch(transaction) {
         let len = transaction.splitIn.length
-        for(let members of transaction.contribution)
+        for(let members of transaction.paidBy)
         {
             let share = parseFloat((members.amount / len).toPrecision(2))
 
             for (let owedBy of transaction.splitIn) {
-                if (owedBy === members.paidBy) continue;
+                if (this.people[owedBy.id] === this.people[members.id]) continue;
 
                 let toPay = share;
 
-                let due = this.graph[members.paidBy][owedBy]
+                let due = this.graph[this.people[members.id]][this.people[owedBy.id]]
                 let contribute = Math.min(due, share);
 
-                this.graph[members.paidBy][owedBy] -= contribute
+                this.graph[this.people[members.id]][this.people[owedBy.id]] -= contribute
                 toPay -= contribute;
 
-                this.graph[owedBy][members.paidBy] += toPay;
+                this.graph[this.people[owedBy.id]][this.people[members.id]] += toPay;
 
             }
         }
