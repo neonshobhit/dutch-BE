@@ -106,7 +106,7 @@ const friends = async () => {
 }
 
 const groupActivity = async () => {
-    let events = require("./controllers/events");
+    let records = require("./controllers/records");
     // let feedback = await events.addMessageActivity({
     //         body:{
     //             eventId:"51W9qZrHxb6aEBIwmiDD",
@@ -150,7 +150,7 @@ const groupActivity = async () => {
         }
     };
 
-    let transaction = await events.addTransaction({
+    let transaction = await records.addTransaction({
         body: tr
     })
     console.log(transaction);
@@ -161,4 +161,4 @@ const groupActivity = async () => {
 // populate()
 // eventTest()
 
-// groupActivity();
+groupActivity();
