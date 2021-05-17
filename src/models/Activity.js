@@ -90,27 +90,29 @@ class Activity extends Members {
             }
         }
 
+        let newchange=this.convertToMap(changegraph);
 
-        return changegraph;
+
+        return newchange;
 
     }
     queryReceivable(q) {
         let receivable = {}
         for (let i = 0; i < this.len; ++i) {
-            if (graph[q][i] === 0) continue;
+            if (this.graph[q][i] === 0) continue;
 
 
-            receivable.i = graph[q][i]
+            receivable.i = this.graph[q][i]
         }
     }
 
     queryPayable(q) {
         let payable = {}
         for (let i = 0; i < this.len; ++i) {
-            if (graph[i][q] === 0) continue;
+            if (this.graph[i][q] === 0) continue;
 
 
-            payable.i = graph[i][q]
+            payable.i = this.graph[i][q]
         }
 
         return payable;
@@ -118,7 +120,7 @@ class Activity extends Members {
 
     allDues() {
         let dues = {}
-        for (i in graph) {
+        for (i in this.graph) {
             dues.i = {
                 receive: this.queryReceivable(i),
                 pay: this.queryPayable(i)
@@ -126,6 +128,15 @@ class Activity extends Members {
         }
 
         return dues;
+    }
+
+    userchanges(){
+        let userdues = {}
+        for (i in this.graph) {
+            userdues.i = this.queryReceivable(i)-this.queryPayable(i);   
+        }
+        let duemap=convertUserDues(userdues);
+        return duemap;
     }
 }
 

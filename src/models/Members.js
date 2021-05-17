@@ -55,6 +55,17 @@ class Members {
         this.mapOfGraph = map
         return map
     }
+
+    convertUserDues(userdues)
+    {
+        let sz = this.size
+        let IDs = this.IDs
+        let usermap = {}
+        for (let i = 0; i < sz; ++i) {   
+            usermap[IDs[i]] = userdues[i];
+        }
+        return usermap;
+    }
 }
 
 module.exports = Members

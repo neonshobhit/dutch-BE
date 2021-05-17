@@ -3,6 +3,9 @@ const {
     firebase
 } = require('../config/firebase')
 
+const Activity = require('./models/Activity')
+const Balance = require('./models/Balance')
+
 const calculateTotalAmount = (paidBy) => {
     let amount = paidBy.reduce((accum,element)=>{
         return accum + element.amount 
@@ -54,7 +57,6 @@ const addShareAndBudget = async (tr,eventInfo,event) =>{
     }
 }
 
-=======
 const updateOwe = (changes, batch) => {
 
     let getref = (i) => db.collection('friends').doc(i)
@@ -103,7 +105,7 @@ exports.addTransaction = async (req, res) => {
     let tr = req.body;
     let eventRef = db.collection("events").doc(tr.event.id);
     let eventInfo = (await eventRef.get()).data();
-
+    
     let out;
     try {
         if (!eventInfo)
@@ -135,10 +137,15 @@ exports.addTransaction = async (req, res) => {
 
         const batch = db.batch()
 
+        let changes=calling(eventInfo,entryData);
+        let graphchanges=changes[0];
+        let userchanges=changes[1];
+
+
         batch.create(recordRef, entryData) // 1
-        updateOwe({}, batch); // 3. Remaining to pass changes map
+        updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
         updateEventDoc(eventRef, batch) // 2., 5., 6. Remaining to pass data
-        updateUserDoc({}, batch); // 4.
+        updateUserDoc(userchanges, batch); // 4.
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
 
@@ -154,6 +161,24 @@ exports.addTransaction = async (req, res) => {
         }
     }
     return out;
+}
+
+function calling(eventInfo,entryData){
+
+    let Activityobject = new Activity(eventInfo.members, eventInfo.graph);
+
+    let oldgraph = Activityobject.getoldgraph();
+    Activityobject.dutch(entryData.share);
+    let newgraph = Activityobject.getGraph();
+
+    let Balanceobject = new Balance(newgraph);
+    newgraph = Balanceobject.simplify();
+
+    let graphchange = Activityobject.calculatechanges(oldgraph, newgraph); 
+
+    let userchange=Activityobject.userchanges();
+
+    return [graphchange,userchange];
 }
 
 exports.addBannerActivity = async (req, res) => {

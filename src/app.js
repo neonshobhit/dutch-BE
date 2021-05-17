@@ -101,16 +101,16 @@ const groupActivity = async () => {
     //         }
     //     })
     // console.log(feedback);
-//     // let f1 = await Event.create({
-//     //     body: {
-//     //         name: "Trip to Nainital",
-//     //         imageURL: "http://some_url_to_image.com",
-//     //         userId: 'BdJNMMHPrDV4uBRt7y5t',
-//     //         userName: 'shobhit',
-//     //     }
-//     // })
+    // let f1 = await Event.create({
+    //     body: {
+    //         name: "Trip to Nainital",
+    //         imageURL: "http://some_url_to_image.com",
+    //         userId: 'BdJNMMHPrDV4uBRt7y5t',
+    //         userName: 'shobhit',
+    //     }
+    // })
 
-//     // console.log(f1);
+    // console.log(f1);
 
         share: {
             splitIn: [{
