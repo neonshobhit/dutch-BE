@@ -3,6 +3,7 @@ const {
 } = require('../config/firebase');
 const QrCodeImage = require("../services/QRcode");
 const jwt = require("jsonwebtoken");
+const secret = require('../config/env').jwt.secret
 // const speakeasy = require("speakeasy");
 var otp;
 
@@ -20,6 +21,11 @@ exports.add = async (req, res) => {
             toPay: 0,
             toReceive: 0
         })
+
+        // Making an empty friend document, so to maintain consistency.
+        // Not waiting because, this request can be completed even after the execution of results.
+        db.collection('friends').doc(newUser.id).set({})
+
         return {
             statusCode: 200,
             newUser: (await newUser.get()).data(),
@@ -113,7 +119,7 @@ exports.signin = async (req, res) => {
             const token = jwt.sign({
                 email,
                 id
-            }, "DUTCHAPPLICATION@1234512132sdfsdf");
+            }, secret);
             return {
                 statusCode: 200,
                 user: {

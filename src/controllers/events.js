@@ -14,7 +14,7 @@ exports.create = async (req, res) => {
         */
         graph: {
             [_b.userId]: {
-                [_b.userId]: 0
+                // [_b.userId]: 0
             }
         },
         members: [{
@@ -22,13 +22,13 @@ exports.create = async (req, res) => {
             name: _b.userName,
             isGuest: false
         }],
+        Activties:[]
     })
 
     let tr = await db.collection('events').doc(ev.id).collection('records').add({
         message: 'Event created',
         userId: null,
         tag: true,
-
     })
 
     return {
@@ -55,7 +55,7 @@ exports.addMembers = async (req, res) => {
 
         let graph = old.graph
         let noDueMap = {
-            [_b.memberId]: 0
+            // [_b.memberId]: 0
         }
 
         for (let x in graph) {
@@ -83,19 +83,7 @@ exports.addMembers = async (req, res) => {
 
 }
 
-exports.addTransaction = async (req, res) => {
-    // 1st assign a reference to the document
-    // run a DB transaction (See addMembers function)
-    // take graph
-    // Use consructor to parse it, and store ids and indices
-    // Call the dutch function
-    // Pass the graph to Balance simplication
-    // Convert indices to original IDs
-    // update the graph
 
-
-    // We'll be updating values- total dues, receivables etc at few more locations, but that's some time later.
-}
 
 exports.getDuesSummary = async (req, res) => {
     const _b = req.body
@@ -106,4 +94,26 @@ exports.getDuesSummary = async (req, res) => {
         graph: (await ref.get()).data().graph
     }
     
+}
+
+
+
+exports.getMembersList = async (req, res) => {
+    const _b = req.body
+    const ref = db.collection('events').doc(_b.eventId)
+
+    return {
+        statusCode: 200,
+        memebrs: (await ref.get()).data().members
+    }
+}
+
+exports.display = async (req, res) => {
+    const _b = req.body
+    const ref = db.collection('events').doc(_b.eventId)
+
+    return {
+        statusCode: 200,
+        data: (await ref.get()).data()
+    }
 }

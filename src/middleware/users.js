@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
+const secret = require('../config/env').jwt.secret
 
 exports.checkValidation = async (req, res) => {
     const {
         token
     } = req.body;
     let output;
-    jwt.verify(token, "DUTCHAPPLICATION@1234512132sdfsdf", (err, user) => {
+    jwt.verify(token, secret, (err, user) => {
         if (err || !user) {
             output = {
                 statusCode: 401,
