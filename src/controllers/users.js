@@ -4,15 +4,14 @@ const {
 const QrCodeImage = require("../services/QRcode");
 const jwt = require("jsonwebtoken");
 const secret = require('../config/env').jwt.secret
-// const speakeasy = require("speakeasy");
-var otp;
+const speakeasy = require("speakeasy");
 
 exports.add = async (req, res) => {
     let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
 
     if (snapshot.empty) {
 
-        otp = Math.floor(100000 + Math.random() * 900000);
+        let otp = Math.floor(100000 + Math.random() * 900000);
 
         let newUser = await db.collection('users').add({
             email: req.body.email,
@@ -20,83 +19,109 @@ exports.add = async (req, res) => {
             // Cumulative of all groups for paying and receiving for this user
             toPay: 0,
             toReceive: 0
+        });
+        let docId = await newUser.collection("userSecret").add({
+            otp:otp
+        });
+        await newUser.update({
+            secretId:docId.id
         })
-
         // Making an empty friend document, so to maintain consistency.
         // Not waiting because, this request can be completed even after the execution of results.
-        db.collection('friends').doc(newUser.id).set({})
+        await db.collection('friends').doc(newUser.id).set({})
 
-        return {
-            statusCode: 200,
+        let data={
             newUser: (await newUser.get()).data(),
             id: newUser.id,
             otp,
         }
-
+        return res.status(200).json(data);
     } else {
         let id
         snapshot.forEach(e => id = e.id)
-        return {
+        let data= {
             id,
-            statusCode: 403,
             error: "Email Id already exists"
         }
+        return res.status(403).json(data);
     }
 }
 
 exports.verifyUser = async (req, res) => {
-    const token = req.body.otp;
-    if (otp !== token) {
-        return {
-            statusCode: 401,
-            error: "Invlid OTP"
-        }
-    } else {
-        let _b = req.body;
-        let result;
-        await db.collection('users').doc(_b.id).update({
-            isVerified: true,
-        }).then(data => {
-            otp = undefined;
-            result = {
-                id: _b.id,
-                statusCode: 200,
-                email: req.body.email,
-            }
-        }).catch(err => {
-            result = {
-                statusCode: 400,
-                error: err.message
-            }
+    const {email,token} = req.body;
+    let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
+    if(snapshot.empty){
+
+        return res.status(401).json({
+            error:"Unauthorized person!"
         })
-        return result;
+    }
+    else {
+        let id;
+        snapshot.forEach(e => id = e.id)
+        try{
+            let user = await db.collection('users').doc(id);
+            let userData = (await user.get()).data()
+            let secret = await user.collection("userSecret").doc(userData.secretId);
+            let secretData = (await secret.get()).data();
+            if(user.isVerified){
+                if(token === secretData.otp.toString()){
+                    await user.update({
+                        isVerified:true
+                    });
+                   return res.status(200).json({
+                        statusCode:200,
+                        message:"User Verified Done."
+                    })
+                }else{
+                   return res.status(401).json({
+                        error:"Otp Doesn't match"
+                    })
+                }
+            }else{
+                return res.status(200).json({message:"User is Already verified."})
+            }
+        }catch(err){
+            return res.status(501).json({
+                error:"Internal Server Error."
+            })
+        }
     }
 }
 
 exports.getQrCode = async (req, res) => {
-    const {
-        email,
-        secret
-    } = req.body;
+    const {email} = req.body;
     let snapshot = await db.collection('users').where('email', '==', email).get();
     if (snapshot.empty) {
-        return {
-            statusCode: 401,
+        return res.status(401).json({
             error: "Unauthorized Person"
-        }
+        })
     } else {
-        // const secret = speakeasy.generateSecret();
-        const qrCodeOutput = QrCodeImage(secret.otpauth_url);
-        if (qrCodeOutput.flag) {
-            return {
-                statusCode: 200,
-                image_url: qrCodeOutput.url
+        let id;
+        snapshot.forEach(e => id = e.id);
+        try{
+            let user = await db.collection('users').doc(id);
+            let userData = (await user.get()).data()
+            let secretData = await user.collection("userSecret").doc(userData.secretId);
+            const secretCode = speakeasy.generateSecret();
+            const qrCodeOutput = QrCodeImage(secretCode.otpauth_url);
+            await secretData.update({
+                secret:secretCode
+            });
+            if (qrCodeOutput.flag) {
+                return res.status(200).json({
+                    image_url: qrCodeOutput.url
+                })
+            } else {
+                return res.status(500).json({
+                    error: "Inernal Server Error"
+                })
             }
-        } else {
-            return {
-                statusCode: 500,
-                error: "Inernal Server Error"
-            }
+        }catch(err){
+            console.log(err)
+            return res.status(501).json({
+                error:"Internal Server Error."
+            })
         }
     }
 }
@@ -108,32 +133,39 @@ exports.signin = async (req, res) => {
     } = req.body;
     let snapshot = await db.collection('users').where('email', '==', email).get();
     if (snapshot.empty) {
-        return {
-            statusCode: 401,
+        return res.status(401).json({
             error: "Unauthorized Person"
-        }
+        })
     } else {
-        if (verificationOtp === 345212) {
+        try{
             let id;
-            snapshot.forEach(e => id = e.id);
-            const token = jwt.sign({
-                email,
-                id
-            }, secret);
-            return {
-                statusCode: 200,
-                user: {
-                    email,
-                    id
-                },
-                message: "User Signin Done.",
-                token
+            snapshot.forEach(e => id = e.id)
+            let user = await db.collection('users').doc(id);
+            let userData = (await user.get()).data()
+            let secretDataInfo = await user.collection("userSecret").doc(userData.secretId);
+            let secretData = (await secretDataInfo.get()).data();
+            let tokenValidates = speakeasy.totp.verify({
+                secret: secretData.secret.base32,
+                encoding: 'base32',
+                token: verificationOtp
+            })
+            if (tokenValidates) {
+                const token = jwt.sign({email,id}, secret);
+                return res.status(200).json({
+                    user: { email,id},
+                    message: "User Signin Done.",
+                    token
+                })
+            } else {
+                return res.status(400).json({
+                    error: "Otp Doen't Match"
+                })
             }
-        } else {
-            return {
-                statusCode: 400,
-                error: "Otp Doen't Match"
-            }
+
+        }catch(err){
+            return res.status(501).json({
+                error:"Internal Server Error."
+            })
         }
     }
 }

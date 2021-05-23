@@ -1,5 +1,5 @@
 const Users = require("../src/controllers/users.js");
-const userMiddleware = require('../src/middleware/users')
+const userMiddleware = require("../src/middleware/users.js");
 const {
     v4: uuid
 } = require("uuid");

@@ -91,8 +91,8 @@ app.listen(require('./config/env').server.port, () => {
 //     const Event = require('./controllers/events')
 //     //     const {v4: uuid} = require('uuid')
 
-const groupActivity = async () => {
-    let records = require("./controllers/records");
+// const groupActivity = async () => {
+//     let records = require("./controllers/records");
     // let feedback = await events.addMessageActivity({
     //         body:{
     //             eventId:"51W9qZrHxb6aEBIwmiDD",
@@ -112,28 +112,28 @@ const groupActivity = async () => {
 
     // console.log(f1);
 
-        share: {
-            splitIn: [{
-                id: "BdJNMMHPrDV4uBRt7y5t",
-                name: "shobhit"
-            }, {
-                id: "G-2121341e-c762-4808-ae08-3154aa477fed",
-                name: "Mr Guest wala"
-            }],
+//         share: {
+//             splitIn: [{
+//                 id: "BdJNMMHPrDV4uBRt7y5t",
+//                 name: "shobhit"
+//             }, {
+//                 id: "G-2121341e-c762-4808-ae08-3154aa477fed",
+//                 name: "Mr Guest wala"
+//             }],
 
-            paidBy: [{
-                id: "BdJNMMHPrDV4uBRt7y5t",
-                name: "shobhit",
-                amount: 1000
-            }]
-        }
-    };
+//             paidBy: [{
+//                 id: "BdJNMMHPrDV4uBRt7y5t",
+//                 name: "shobhit",
+//                 amount: 1000
+//             }]
+//         }
+//     };
 
-    let transaction = await records.addTransaction({
-        body: tr
-    })
-    console.log(transaction);
-}
+//     let transaction = await records.addTransaction({
+//         body: tr
+//     })
+//     console.log(transaction);
+// }
 
 // friends()
 
