@@ -137,6 +137,9 @@ exports.addTransaction = async (req, res) => {
 
         const batch = db.batch()
         let changes = calling(eventInfo, entryData);
+        console.log(changes)
+        console.log(typeof changes[0])
+        console.log
         let graphchanges = changes[0];
         let userchanges = changes[1];
         let finalgraph = changes[2];
@@ -145,6 +148,7 @@ exports.addTransaction = async (req, res) => {
         updateEventDoc(eventRef, batch, finalgraph) // 2., 5., 6. Remaining to pass data
         updateUserDoc(userchanges, batch); // 4.
 
+        
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
         let a = await batch.commit();
         console.log(a)
