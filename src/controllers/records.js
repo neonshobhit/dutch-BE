@@ -7,50 +7,50 @@ const Activity = require('../models/Activity')
 const Balance = require('../models/Balance')
 
 const calculateTotalAmount = (paidBy) => {
-    let amount = paidBy.reduce((accum,element)=>{
-        return accum + element.amount 
-    },0)
+    let amount = paidBy.reduce((accum, element) => {
+        return accum + element.amount
+    }, 0)
     return amount;
 }
 
-const calculateShare = (splitIn,eventInfo,tempAmount) => {
-    let share = (eventInfo.stats && eventInfo.stats.share)?eventInfo.stats.share:{};
-    let splittedAmount = tempAmount/splitIn.length;
-    if(share){
-        splitIn.map((element,index)=>{
-            if(element.id in share){
+const calculateShare = (splitIn, eventInfo, tempAmount) => {
+    let share = (eventInfo.stats && eventInfo.stats.share) ? eventInfo.stats.share : {};
+    let splittedAmount = tempAmount / splitIn.length;
+    if (share) {
+        splitIn.map((element, index) => {
+            if (element.id in share) {
                 share[element.id] += splittedAmount;
-            }else{
+            } else {
                 share[element.id] = splittedAmount;
             }
         })
-    }else{
+    } else {
         share = {};
-        for(let i = 0;i<splitIn.length;i++){
-            share[splitIn[i].id]  = splittedAmount;
+        for (let i = 0; i < splitIn.length; i++) {
+            share[splitIn[i].id] = splittedAmount;
         }
     }
     return share;
 }
 
-const addShareAndBudget = async (tr,eventInfo,event) =>{
+const addShareAndBudget = async (tr, eventInfo, event) => {
     let tempAmount = calculateTotalAmount(tr.share.paidBy);
-    let share = calculateShare(tr.share.splitIn,eventInfo,tempAmount);
+    let share = calculateShare(tr.share.splitIn, eventInfo, tempAmount);
 
-    if(eventInfo.stats && eventInfo.stats.budget){
+    if (eventInfo.stats && eventInfo.stats.budget) {
         await event.update({
-            stats:{
-                budget:eventInfo.stats.budget,
-                expenditure: ((eventInfo.stats.expenditure)?(eventInfo.stats.expenditure):0) + tempAmount,
-                share
-            }
-        }).then(data=>{})
-        .catch(err=>console.log(err));
-    }else{
+                stats: {
+                    budget: eventInfo.stats.budget,
+                    expenditure: ((eventInfo.stats.expenditure) ? (eventInfo.stats.expenditure) : 0) + tempAmount,
+                    share
+                }
+            }).then(data => {})
+            .catch(err => console.log(err));
+    } else {
         await event.update({
-            stats:{
-                budget:10000,
-                expenditure:0 + tempAmount,
+            stats: {
+                budget: 10000,
+                expenditure: 0 + tempAmount,
                 share
             }
         })
@@ -62,7 +62,7 @@ const updateOwe = (changes, batch) => {
     let getref = (i) => db.collection('friends').doc(i)
     for (let i in changes) {
         let updater = {}
-        
+
         for (let j in changes[i]) {
             // console.log(changes[i][j]);
             updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
@@ -72,11 +72,9 @@ const updateOwe = (changes, batch) => {
     }
 }
 
-const updateEventDoc = (eventRef,batch,finalgraph) => {
+const updateEventDoc = (eventRef, batch, finalgraph) => {
     batch.update(eventRef, {
-        graph: firebase.firestore.FieldValue.increment(finalgraph),// {
-
-        //},
+        graph: finalgraph,
         stats: {
             expenditure: firebase.firestore.FieldValue.increment(0),
             share: {
@@ -103,9 +101,10 @@ const updateUserDoc = (changes, batch) => {
 
 exports.addTransaction = async (req, res) => {
     let tr = req.body;
+    console.log(tr)
     let eventRef = db.collection("events").doc(tr.event.id);
     let eventInfo = (await eventRef.get()).data();
-    
+
     let out;
     try {
         if (!eventInfo)
@@ -119,7 +118,7 @@ exports.addTransaction = async (req, res) => {
             },
             share: tr.share
             //payment: tr.payment,
-            
+
         };
         // Targets:
         // 1. Write in records, that is message section.
@@ -137,48 +136,50 @@ exports.addTransaction = async (req, res) => {
         //console.log(entryData);
 
         const batch = db.batch()
-        let changes=calling(eventInfo,entryData);
-        let graphchanges=changes[0];
-        let userchanges=changes[1];
-        let finalgraph=changes[2];
+        let changes = calling(eventInfo, entryData);
+        let graphchanges = changes[0];
+        let userchanges = changes[1];
+        let finalgraph = changes[2];
         batch.create(recordRef, entryData) // 1
         updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
-        //updateEventDoc(eventRef, batch,finalgraph) // 2., 5., 6. Remaining to pass data
-        //updateUserDoc(userchanges, batch); // 4.
+        updateEventDoc(eventRef, batch, finalgraph) // 2., 5., 6. Remaining to pass data
+        updateUserDoc(userchanges, batch); // 4.
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
-        await batch.commit();
+        let a = await batch.commit();
+        console.log(a)
         return {
             statusCode: 200,
             id: recordRef,
             data: entryData
         }
     } catch (err) {
+        console.log(err)
         out = {
             statusCode: 400,
-            error: err
+            error: err.message
         }
     }
     return out;
 }
 
-function calling(eventInfo,entryData){
+function calling(eventInfo, entryData) {
     let Activityobject = new Activity(eventInfo.members, eventInfo.graph);
 
     let oldgraph = Activityobject.getoldgraph();
-    
+
     Activityobject.dutch(entryData.share);
     let newgraph = Activityobject.getoldgraph();
 
     let Balanceobject = new Balance(newgraph);
     newgraph = Balanceobject.simplify();
 
-    let graphchange = Activityobject.calculatechanges(oldgraph, newgraph); 
+    let graphchange = Activityobject.calculatechanges(oldgraph, newgraph);
 
-    let userchange=Activityobject.userchanges();
-    
-    let newmap=Activityobject.convertToMap(newgraph);
-    return [graphchange,userchange,newmap];
+    let userchange = Activityobject.userchanges();
+
+    let newmap = Activityobject.convertToMap(newgraph);
+    return [graphchange, userchange, newmap];
 }
 
 exports.addBannerActivity = async (req, res) => {

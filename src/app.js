@@ -1,9 +1,9 @@
-const e = require('express')
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 
 app.use(express.json())
-
+app.use(morgan('tiny'))
 // Assigning multipe times so that we can deply each one as an individual function at Cloud Funcitions
 const users = app
 const records = app

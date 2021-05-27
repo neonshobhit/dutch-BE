@@ -17,10 +17,10 @@ class Activity extends Members {
                 processedGraph[i_index][j_index] = map[i][j]
             }
         }
-        
+
         this.graph = processedGraph
         this.fetchedGraph = processedGraph
-        this.len=this.graph.length;
+        this.len = this.graph.length;
 
     }
 
@@ -32,9 +32,8 @@ class Activity extends Members {
     getoldgraph() {
 
         // create new graph and assign it values before transacion
-        let graph =[]
-        let sz=this.graph.length;
-        {
+        let graph = []
+        let sz = this.graph.length; {
             let dummy = []
             for (let i = 0; i < sz; ++i) {
                 dummy.push(0);
@@ -44,12 +43,10 @@ class Activity extends Members {
             }
         }
 
-       
-        for(let i=0;i<sz;i++)
-        {
-            for(let j=0;j<sz;j++)
-            {
-                graph[i][j]=this.graph[i][j];
+
+        for (let i = 0; i < sz; i++) {
+            for (let j = 0; j < sz; j++) {
+                graph[i][j] = this.graph[i][j];
             }
         }
         return graph;
@@ -58,11 +55,16 @@ class Activity extends Members {
 
     dutch(transaction) {
         let len = transaction.splitIn.length
-        for(let members of transaction.paidBy)
-        {
+        for (let members of transaction.paidBy) {
             let share = parseFloat((members.amount / len).toPrecision(2))
+
             for (let owedBy of transaction.splitIn) {
-                //console.log(owedBy);
+                // console.log(owedBy);
+                // owedBy = {
+                //     id: owedBy
+                // }
+                // console.log(this.people[owedBy.id])
+                // console.log(this.people[members.id])
                 if (this.people[owedBy.id] === this.people[members.id]) continue;
 
                 let toPay = share;
@@ -89,31 +91,33 @@ class Activity extends Members {
                 changegraph[i][j] = newgraph[i][j] - oldgraph[i][j];
             }
         }
-        let newchange=this.convertmap(changegraph);
+        let newchange = this.convertmap(changegraph);
 
         return newchange;
 
     }
     queryReceivable(q) {
-        let receivable = {},rec=0
+        let receivable = {},
+            rec = 0
         for (let i = 0; i < this.len; ++i) {
             if (this.graph[q][i] === 0) continue;
 
 
             receivable.i = this.graph[q][i]
-            rec+=this.graph[q][i];
+            rec += this.graph[q][i];
         }
         return rec;
     }
 
     queryPayable(q) {
-        let payable = {},pay=0
+        let payable = {},
+            pay = 0
         for (let i = 0; i < this.len; ++i) {
             if (this.graph[i][q] === 0) continue;
 
 
             payable.i = this.graph[i][q]
-            pay+=this.graph[i][q];
+            pay += this.graph[i][q];
         }
 
         return pay;
@@ -131,12 +135,12 @@ class Activity extends Members {
         return dues;
     }
 
-    userchanges(){
+    userchanges() {
         let userdues = []
-        for (let i=0;i<this.len;i++) {
-            userdues.push(this.queryReceivable(i)-this.queryPayable(i));   
+        for (let i = 0; i < this.len; i++) {
+            userdues.push(this.queryReceivable(i) - this.queryPayable(i));
         }
-        let duemap=this.convertUserDues(userdues);
+        let duemap = this.convertUserDues(userdues);
         return duemap;
     }
 }
