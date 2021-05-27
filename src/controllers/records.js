@@ -2,61 +2,60 @@ const {
     db,
     firebase
 } = require('../config/firebase')
+const minimizingPayments = require('../services/minimizePayments')
 
 const calculateTotalAmount = (paidBy) => {
-    let amount = paidBy.reduce((accum,element)=>{
-        return accum + element.amount 
-    },0)
+    let amount = paidBy.reduce((accum, element) => {
+        return accum + element.amount
+    }, 0)
     return amount;
 }
 
-const calculateShare = (splitIn,eventInfo,tempAmount) => {
-    let share = (eventInfo.stats && eventInfo.stats.share)?eventInfo.stats.share:{};
-    let splittedAmount = tempAmount/splitIn.length;
-    if(share){
-        splitIn.map((element,index)=>{
-            if(element.id in share){
+const calculateShare = (splitIn, eventInfo, tempAmount) => {
+    let share = (eventInfo.stats && eventInfo.stats.share) ? eventInfo.stats.share : {};
+    let splittedAmount = tempAmount / splitIn.length;
+    if (share) {
+        splitIn.map((element, index) => {
+            if (element.id in share) {
                 share[element.id] += splittedAmount;
-            }else{
+            } else {
                 share[element.id] = splittedAmount;
             }
         })
-    }else{
+    } else {
         share = {};
-        for(let i = 0;i<splitIn.length;i++){
-            share[splitIn[i].id]  = splittedAmount;
+        for (let i = 0; i < splitIn.length; i++) {
+            share[splitIn[i].id] = splittedAmount;
         }
     }
     return share;
 }
 
-const addShareAndBudget = async (tr,eventInfo,event) =>{
+const addShareAndBudget = async (tr, eventInfo, event) => {
     let tempAmount = calculateTotalAmount(tr.share.paidBy);
-    let share = calculateShare(tr.share.splitIn,eventInfo,tempAmount);
+    let share = calculateShare(tr.share.splitIn, eventInfo, tempAmount);
 
-    if(eventInfo.stats && eventInfo.stats.budget){
+    if (eventInfo.stats && eventInfo.stats.budget) {
         await event.update({
-            stats:{
-                budget:eventInfo.stats.budget,
-                expenditure: ((eventInfo.stats.expenditure)?(eventInfo.stats.expenditure):0) + tempAmount,
-                share
-            }
-        }).then(data=>{})
-        .catch(err=>console.log(err));
-    }else{
+                stats: {
+                    budget: eventInfo.stats.budget,
+                    expenditure: ((eventInfo.stats.expenditure) ? (eventInfo.stats.expenditure) : 0) + tempAmount,
+                    share
+                }
+            }).then(data => {})
+            .catch(err => console.log(err));
+    } else {
         await event.update({
-            stats:{
-                budget:10000,
-                expenditure:0 + tempAmount,
+            stats: {
+                budget: 10000,
+                expenditure: 0 + tempAmount,
                 share
             }
         })
     }
 }
 
-=======
 const updateOwe = (changes, batch) => {
-
     let getref = (i) => db.collection('friends').doc(i)
     for (let i in changes) {
         let updater = {}
@@ -64,17 +63,13 @@ const updateOwe = (changes, batch) => {
         for (let j in changes[i]) {
             updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
         }
-
         batch.update(getref(i), updater);
     }
 }
 
-const updateEventDoc = (id, batch) => {
-    let eventRef = db.collection("events").doc(id);
+const updateEventDoc = (eventRef, batch, finalgraph) => {
     batch.update(eventRef, {
-        graph: {
-
-        },
+        graph: finalgraph,
         stats: {
             expenditure: firebase.firestore.FieldValue.increment(0),
             share: {
@@ -115,10 +110,10 @@ exports.addTransaction = async (req, res) => {
                 id: tr.event.id,
                 name: tr.event.name
             },
-            payment: tr.payment,
             share: tr.share
-        };
+            //payment: tr.payment,
 
+        };
         // Targets:
         // 1. Write in records, that is message section.
         // 2. Update graph in event
@@ -128,33 +123,40 @@ exports.addTransaction = async (req, res) => {
         // 6. Increase per involved user's share
 
         // Calculate total_transaction amount for the event.
-        await addShareAndBudget(tr,eventInfo,event);
+        //await addShareAndBudget(tr,eventInfo,event);
 
         const recordRef = db.collection("events").doc(tr.event.id).collection("records").doc()
 
 
         const batch = db.batch()
+        let changes = minimizingPayments(eventInfo, entryData);
 
+        let graphchanges = changes[0];
+        let userchanges = changes[1];
+        let finalgraph = changes[2];
         batch.create(recordRef, entryData) // 1
-        updateOwe({}, batch); // 3. Remaining to pass changes map
-        updateEventDoc(eventRef, batch) // 2., 5., 6. Remaining to pass data
-        updateUserDoc({}, batch); // 4.
+        updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
+        updateEventDoc(eventRef, batch, finalgraph) // 2., 5., 6. Remaining to pass data
+        updateUserDoc(userchanges, batch); // 4.
+
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
-
+        let a = await batch.commit();
+        // console.log(a)
         return {
             statusCode: 200,
-            id: recordRef,
-            data: entryData
+            data: a
         }
     } catch (err) {
+        console.log(err)
         out = {
             statusCode: 400,
-            error: err
+            error: err.message
         }
     }
     return out;
 }
+
 
 exports.addBannerActivity = async (req, res) => {
     let {

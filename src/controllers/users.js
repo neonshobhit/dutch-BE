@@ -21,16 +21,16 @@ exports.add = async (req, res) => {
             toReceive: 0
         });
         let docId = await newUser.collection("userSecret").add({
-            otp:otp
+            otp: otp
         });
         await newUser.update({
-            secretId:docId.id
+            secretId: docId.id
         })
         // Making an empty friend document, so to maintain consistency.
         // Not waiting because, this request can be completed even after the execution of results.
         await db.collection('friends').doc(newUser.id).set({})
 
-        let data={
+        let data = {
             newUser: (await newUser.get()).data(),
             id: newUser.id,
             otp,
@@ -39,7 +39,7 @@ exports.add = async (req, res) => {
     } else {
         let id
         snapshot.forEach(e => id = e.id)
-        let data= {
+        let data = {
             id,
             error: "Email Id already exists"
         }
@@ -48,49 +48,55 @@ exports.add = async (req, res) => {
 }
 
 exports.verifyUser = async (req, res) => {
-    const {email,token} = req.body;
+    const {
+        email,
+        token
+    } = req.body;
     let snapshot = await db.collection('users').where('email', '==', req.body.email).get();
-    if(snapshot.empty){
+    if (snapshot.empty) {
 
         return res.status(401).json({
-            error:"Unauthorized person!"
+            error: "Unauthorized person!"
         })
-    }
-    else {
+    } else {
         let id;
         snapshot.forEach(e => id = e.id)
-        try{
+        try {
             let user = await db.collection('users').doc(id);
             let userData = (await user.get()).data()
             let secret = await user.collection("userSecret").doc(userData.secretId);
             let secretData = (await secret.get()).data();
-            if(user.isVerified){
-                if(token === secretData.otp.toString()){
+            if (!user.isVerified) {
+                if (token === secretData.otp.toString()) {
                     await user.update({
-                        isVerified:true
+                        isVerified: true
                     });
-                   return res.status(200).json({
-                        statusCode:200,
-                        message:"User Verified Done."
+                    return res.status(200).json({
+                        statusCode: 200,
+                        message: "User Verified Done."
                     })
-                }else{
-                   return res.status(401).json({
-                        error:"Otp Doesn't match"
+                } else {
+                    return res.status(401).json({
+                        error: "Otp Doesn't match"
                     })
                 }
-            }else{
-                return res.status(200).json({message:"User is Already verified."})
+            } else {
+                return res.status(200).json({
+                    message: "User is Already verified."
+                })
             }
-        }catch(err){
+        } catch (err) {
             return res.status(501).json({
-                error:"Internal Server Error."
+                error: "Internal Server Error."
             })
         }
     }
 }
 
 exports.getQrCode = async (req, res) => {
-    const {email} = req.body;
+    const {
+        email
+    } = req.body;
     let snapshot = await db.collection('users').where('email', '==', email).get();
     if (snapshot.empty) {
         return res.status(401).json({
@@ -99,14 +105,14 @@ exports.getQrCode = async (req, res) => {
     } else {
         let id;
         snapshot.forEach(e => id = e.id);
-        try{
+        try {
             let user = await db.collection('users').doc(id);
             let userData = (await user.get()).data()
             let secretData = await user.collection("userSecret").doc(userData.secretId);
             const secretCode = speakeasy.generateSecret();
             const qrCodeOutput = QrCodeImage(secretCode.otpauth_url);
             await secretData.update({
-                secret:secretCode
+                secret: secretCode
             });
             if (qrCodeOutput.flag) {
                 return res.status(200).json({
@@ -117,10 +123,10 @@ exports.getQrCode = async (req, res) => {
                     error: "Inernal Server Error"
                 })
             }
-        }catch(err){
+        } catch (err) {
             console.log(err)
             return res.status(501).json({
-                error:"Internal Server Error."
+                error: "Internal Server Error."
             })
         }
     }
@@ -137,7 +143,7 @@ exports.signin = async (req, res) => {
             error: "Unauthorized Person"
         })
     } else {
-        try{
+        try {
             let id;
             snapshot.forEach(e => id = e.id)
             let user = await db.collection('users').doc(id);
@@ -150,9 +156,15 @@ exports.signin = async (req, res) => {
                 token: verificationOtp
             })
             if (tokenValidates) {
-                const token = jwt.sign({email,id}, secret);
+                const token = jwt.sign({
+                    email,
+                    id
+                }, secret);
                 return res.status(200).json({
-                    user: { email,id},
+                    user: {
+                        email,
+                        id
+                    },
                     message: "User Signin Done.",
                     token
                 })
@@ -162,9 +174,9 @@ exports.signin = async (req, res) => {
                 })
             }
 
-        }catch(err){
+        } catch (err) {
             return res.status(501).json({
-                error:"Internal Server Error."
+                error: "Internal Server Error."
             })
         }
     }
@@ -179,11 +191,11 @@ exports.addFriend = async (req, res) => {
         .collection('friends')
         .doc(_b.otherUser)
         .get()
+
     if (checkAlreadyFriend.exists) {
-        return {
-            statusCode: 208,
-            message: "Friend already added!",
-        }
+        return res.status(208).json({
+            message: "Friend already added!"
+        })
     }
 
     // If both are added to each other than only they'll be saved, else rollback will happen.
@@ -204,9 +216,7 @@ exports.addFriend = async (req, res) => {
 
     await batch.commit();
 
-    return {
-        statusCode: 200
-    }
+    return res.status(200).json({})
 }
 
 exports.fetchFriends = async (req, res) => {
@@ -230,4 +240,14 @@ exports.fetchFriends = async (req, res) => {
     // log(out)
 
     return out
+}
+
+exports.profile = async (body) => {
+    let user = await db.collection('users').doc(body.userId).get()
+
+    return {
+        user: user.data(),
+        id: user.id,
+        statusCode: 200
+    }
 }
