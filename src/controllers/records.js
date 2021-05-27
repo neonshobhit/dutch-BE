@@ -3,8 +3,8 @@ const {
     firebase
 } = require('../config/firebase')
 
-const Activity = require('./models/Activity')
-const Balance = require('./models/Balance')
+const Activity = require('../models/Activity')
+const Balance = require('../models/Balance')
 
 const calculateTotalAmount = (paidBy) => {
     let amount = paidBy.reduce((accum,element)=>{
@@ -58,25 +58,25 @@ const addShareAndBudget = async (tr,eventInfo,event) =>{
 }
 
 const updateOwe = (changes, batch) => {
-
+    console.log(changes);
     let getref = (i) => db.collection('friends').doc(i)
     for (let i in changes) {
         let updater = {}
-
+        
         for (let j in changes[i]) {
+            // console.log(changes[i][j]);
             updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
         }
-
+        console.log(updater);
         batch.update(getref(i), updater);
     }
 }
 
-const updateEventDoc = (id, batch) => {
-    let eventRef = db.collection("events").doc(id);
+const updateEventDoc = (eventRef,batch,finalgraph) => {
     batch.update(eventRef, {
-        graph: {
+        graph: firebase.firestore.FieldValue.increment(finalgraph),// {
 
-        },
+        //},
         stats: {
             expenditure: firebase.firestore.FieldValue.increment(0),
             share: {
@@ -117,10 +117,10 @@ exports.addTransaction = async (req, res) => {
                 id: tr.event.id,
                 name: tr.event.name
             },
-            payment: tr.payment,
             share: tr.share
+            //payment: tr.payment,
+            
         };
-
         // Targets:
         // 1. Write in records, that is message section.
         // 2. Update graph in event
@@ -130,25 +130,24 @@ exports.addTransaction = async (req, res) => {
         // 6. Increase per involved user's share
 
         // Calculate total_transaction amount for the event.
-        await addShareAndBudget(tr,eventInfo,event);
+        //await addShareAndBudget(tr,eventInfo,event);
 
         const recordRef = db.collection("events").doc(tr.event.id).collection("records").doc()
-
+        //console.log(eventInfo);
+        //console.log(entryData);
 
         const batch = db.batch()
-
         let changes=calling(eventInfo,entryData);
         let graphchanges=changes[0];
         let userchanges=changes[1];
-
-
+        let finalgraph=changes[2];
         batch.create(recordRef, entryData) // 1
         updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
-        updateEventDoc(eventRef, batch) // 2., 5., 6. Remaining to pass data
-        updateUserDoc(userchanges, batch); // 4.
+        //updateEventDoc(eventRef, batch,finalgraph) // 2., 5., 6. Remaining to pass data
+        //updateUserDoc(userchanges, batch); // 4.
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
-
+        await batch.commit();
         return {
             statusCode: 200,
             id: recordRef,
@@ -164,12 +163,12 @@ exports.addTransaction = async (req, res) => {
 }
 
 function calling(eventInfo,entryData){
-
     let Activityobject = new Activity(eventInfo.members, eventInfo.graph);
 
     let oldgraph = Activityobject.getoldgraph();
+    
     Activityobject.dutch(entryData.share);
-    let newgraph = Activityobject.getGraph();
+    let newgraph = Activityobject.getoldgraph();
 
     let Balanceobject = new Balance(newgraph);
     newgraph = Balanceobject.simplify();
@@ -177,8 +176,9 @@ function calling(eventInfo,entryData){
     let graphchange = Activityobject.calculatechanges(oldgraph, newgraph); 
 
     let userchange=Activityobject.userchanges();
-
-    return [graphchange,userchange];
+    
+    let newmap=Activityobject.convertToMap(newgraph);
+    return [graphchange,userchange,newmap];
 }
 
 exports.addBannerActivity = async (req, res) => {

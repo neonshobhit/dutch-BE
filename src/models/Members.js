@@ -31,6 +31,28 @@ class Members {
     }
 
     // Converting array graph to map, so to push back to database again.
+
+    convertmap(graph){
+        let sz = this.size
+        let IDs = this.IDs
+        let map = {}
+
+        // The graph converted from arrays to a map.
+        for (let i = 0; i < sz; ++i) {
+            for (let j = 0; j < sz; ++j) {
+
+                if (!map[IDs[i]]) {
+                    map[IDs[i]] = {
+                        [IDs[j]]: graph[i][j]
+                    }
+                } else {
+                    map[IDs[i]][IDs[j]] = graph[i][j];
+                }
+
+            }
+        }
+        return map
+    }
     convertToMap(graph) {
         let sz = this.size
         let IDs = this.IDs
@@ -56,9 +78,8 @@ class Members {
         return map
     }
 
-    convertUserDues(userdues)
-    {
-        let sz = this.size
+    convertUserDues(userdues){
+        let sz = this.size;
         let IDs = this.IDs
         let usermap = {}
         for (let i = 0; i < sz; ++i) {   

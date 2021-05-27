@@ -17,9 +17,10 @@ class Activity extends Members {
                 processedGraph[i_index][j_index] = map[i][j]
             }
         }
-
+        
         this.graph = processedGraph
         this.fetchedGraph = processedGraph
+        this.len=this.graph.length;
 
     }
 
@@ -60,12 +61,11 @@ class Activity extends Members {
         for(let members of transaction.paidBy)
         {
             let share = parseFloat((members.amount / len).toPrecision(2))
-
             for (let owedBy of transaction.splitIn) {
+                //console.log(owedBy);
                 if (this.people[owedBy.id] === this.people[members.id]) continue;
 
                 let toPay = share;
-
                 let due = this.graph[this.people[members.id]][this.people[owedBy.id]]
                 let contribute = Math.min(due, share);
 
@@ -81,7 +81,7 @@ class Activity extends Members {
 
     calculatechanges(oldgraph, newgraph) {
 
-        let changegraph = oldgraph;
+        let changegraph = this.getoldgraph();
         let sz = changegraph.length;
 
         for (let i = 0; i < sz; i++) {
@@ -89,33 +89,34 @@ class Activity extends Members {
                 changegraph[i][j] = newgraph[i][j] - oldgraph[i][j];
             }
         }
-
-        let newchange=this.convertToMap(changegraph);
-
+        let newchange=this.convertmap(changegraph);
 
         return newchange;
 
     }
     queryReceivable(q) {
-        let receivable = {}
+        let receivable = {},rec=0
         for (let i = 0; i < this.len; ++i) {
             if (this.graph[q][i] === 0) continue;
 
 
             receivable.i = this.graph[q][i]
+            rec+=this.graph[q][i];
         }
+        return rec;
     }
 
     queryPayable(q) {
-        let payable = {}
+        let payable = {},pay=0
         for (let i = 0; i < this.len; ++i) {
             if (this.graph[i][q] === 0) continue;
 
 
             payable.i = this.graph[i][q]
+            pay+=this.graph[i][q];
         }
 
-        return payable;
+        return pay;
     }
 
     allDues() {
@@ -131,11 +132,11 @@ class Activity extends Members {
     }
 
     userchanges(){
-        let userdues = {}
-        for (i in this.graph) {
-            userdues.i = this.queryReceivable(i)-this.queryPayable(i);   
+        let userdues = []
+        for (let i=0;i<this.len;i++) {
+            userdues.push(this.queryReceivable(i)-this.queryPayable(i));   
         }
-        let duemap=convertUserDues(userdues);
+        let duemap=this.convertUserDues(userdues);
         return duemap;
     }
 }

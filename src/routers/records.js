@@ -1,6 +1,7 @@
 const router = require('express').Router()
-
-router.get('/add', (req, res) => {
+const event=require('../controllers/records')
+router.post('/transaction', (req, res) => {
+    event.addTransaction(req,res);
     res.send("Add")
 })
 

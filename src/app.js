@@ -1,3 +1,4 @@
+const e = require('express')
 const express = require('express')
 const app = express()
 
@@ -12,14 +13,19 @@ const events = app
 users.use('/users', require('./routers/users'))
 records.use('/records', require('./routers/records'))
 friends.use('/friends', require('./routers/friends'))
-events.use('/events', require('./routers/users'))
+events.use('/events', require('./routers/event'))
 
-app.get('*', (req, res) => {
+// app.get('*', (req, res) => {
+//     res.send("hello world")
+// })
+
+
+app.post('*',(req, res) => {
+    //console.log(req.body);
+    //console.log(req.headers);
+    console.log(req.header("authorization"));
     res.send("hello world")
 })
-
-
-
 
 
 app.listen(require('./config/env').server.port, () => {
@@ -30,16 +36,19 @@ app.listen(require('./config/env').server.port, () => {
 
 
 
-// const {
-//     db
-// } = require('./config/firebase');
+const {
+    db
+} = require('./config/firebase');
 
 // const {
 //     share
 // } = require('./dummy data/history');
 
 // //const Users = require("./controllers/users");
-// const populate = async () => {
+ const populate = async () => {
+    let eventRef = db.collection("events").doc("70SlEscVNqcj1AyhJoWx");
+    let eventInfo = (await eventRef.get()).data();
+    console.log(eventInfo);
 //     const Activity = require('./models/Activity')
 //     const Balance = require('./models/Balance')
 //     const {
@@ -82,9 +91,9 @@ app.listen(require('./config/env').server.port, () => {
 
 //     //console.log(graph);
 
-// }
+ }
 
-// //populate();
+ //populate();
 
 
 // const eventTest = async () => {

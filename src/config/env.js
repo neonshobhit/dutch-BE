@@ -3,6 +3,6 @@ module.exports = {
         secret: "DUTCHAPPLICATION@1234512132sdfsdf"
     },
     server: {
-        port: 8000
+        port: 3000
     }
 }

@@ -64,7 +64,7 @@ exports.verifyUser = async (req, res) => {
             let userData = (await user.get()).data()
             let secret = await user.collection("userSecret").doc(userData.secretId);
             let secretData = (await secret.get()).data();
-            if(user.isVerified){
+            if(!user.isVerified){
                 if(token === secretData.otp.toString()){
                     await user.update({
                         isVerified:true
@@ -180,10 +180,9 @@ exports.addFriend = async (req, res) => {
         .doc(_b.otherUser)
         .get()
     if (checkAlreadyFriend.exists) {
-        return {
-            statusCode: 208,
-            message: "Friend already added!",
-        }
+        return res.status(208).json({
+            message: "Friend already added!"
+        })
     }
 
     // If both are added to each other than only they'll be saved, else rollback will happen.
@@ -204,9 +203,8 @@ exports.addFriend = async (req, res) => {
 
     await batch.commit();
 
-    return {
-        statusCode: 200
-    }
+    return res.status(208).json({
+    })
 }
 
 exports.fetchFriends = async (req, res) => {
