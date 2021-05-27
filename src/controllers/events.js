@@ -13,16 +13,15 @@ exports.create = async (req, res) => {
             This graph means, for now, only one user is in the group. And hence, total due amount with that user is 0.
         */
         graph: {
-            [_b.userId]: {
-                 [_b.userId]: 0
-            }
+            // [_b.userId]: {
+                // [_b.userId]: 0
+            // }
         },
         members: [{
             userId: _b.userId,
             name: _b.userName,
             isGuest: false
         }],
-        Activties:[]
     })
 
     let tr = await db.collection('events').doc(ev.id).collection('records').add({
@@ -44,7 +43,7 @@ exports.addMembers = async (req, res) => {
 
     // Adding member to the member list. Also updating the graph by initializing due amount to be 0 to each other.
     const members = await db.runTransaction(async t => {
-        
+
         let old = (await t.get(ref)).data() // read from transaction
         // console.log(oldList)
         let newList = [...old.members, {
@@ -53,22 +52,22 @@ exports.addMembers = async (req, res) => {
             isGuest: _b.isGuest
         }]
 
-        let graph = old.graph
-        let noDueMap = {
-             [_b.memberId]: 0
-        }
+        // let graph = old.graph
+        // let noDueMap = {
+        //     // [_b.memberId]: 0
+        // }
 
-        for (let x in graph) {
-            graph[x][_b.memberId] = 0
-            noDueMap[x] = 0;
-        }
+        // for (let x in graph) {
+        //     graph[x][_b.memberId] = 0
+        //     noDueMap[x] = 0;
+        // }
 
-        graph[_b.memberId] = noDueMap
+        // graph[_b.memberId] = noDueMap
 
         // updating on transaction
         t.update(ref, {
             members: newList,
-            graph: graph
+            // graph: graph
         })
 
         return newList
@@ -85,21 +84,19 @@ exports.addMembers = async (req, res) => {
 
 
 
-exports.getDuesSummary = async (req, res) => {
-    const _b = req.body
+exports.getDuesSummary = async (_b) => {
     const ref = db.collection('events').doc(_b.eventId)
 
     return {
         statusCode: 200,
         graph: (await ref.get()).data().graph
     }
-    
+
 }
 
 
 
-exports.getMembersList = async (req, res) => {
-    const _b = req.body
+exports.getMembersList = async (_b) => {
     const ref = db.collection('events').doc(_b.eventId)
 
     return {

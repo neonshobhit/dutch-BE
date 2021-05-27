@@ -1,6 +1,6 @@
 const Activity = require("./Activity");
 
-class Balance{
+class Balance {
     constructor(graph) {
         let credit = []
         let debit = []
@@ -38,7 +38,7 @@ class Balance{
         this.credit = credit
         this.debit = debit
 
-
+        this.size = graph.length
 
     }
 
@@ -61,29 +61,27 @@ class Balance{
         let graph = []
 
 
-        let p=this.credit.length;
-        let q=this.debit.length;
+        let p = this.credit.length;
+        let q = this.debit.length;
 
 
         {
             let dummy = []
-            for (let i = 0; i < p+q; ++i) {
+            for (let i = 0; i < this.size; ++i) {
                 dummy.push(0);
             }
-            for (let i = 0; i < p+q; ++i) {
+            for (let i = 0; i < this.size; ++i) {
                 graph.push([...dummy]);
             }
         }
 
-
-        
-        while(p) {
-            let debitamount=this.debit[q - 1].amount;
-            let creditamount=this.credit[p - 1].amount;
+        while (p) {
+            let debitamount = this.debit[q - 1].amount;
+            let creditamount = this.credit[p - 1].amount;
 
 
-            let debitfrom=this.debit[q - 1].from;
-            let creditto=this.credit[p - 1].to;
+            let debitfrom = this.debit[q - 1].from;
+            let creditto = this.credit[p - 1].to;
 
 
             if (debitamount > creditamount) {
@@ -106,7 +104,7 @@ class Balance{
                 q--;
             }
         }
-
+        
         return graph;
 
     }

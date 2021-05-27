@@ -59,12 +59,7 @@ class Activity extends Members {
             let share = parseFloat((members.amount / len).toPrecision(2))
 
             for (let owedBy of transaction.splitIn) {
-                // console.log(owedBy);
-                // owedBy = {
-                //     id: owedBy
-                // }
-                // console.log(this.people[owedBy.id])
-                // console.log(this.people[members.id])
+
                 if (this.people[owedBy.id] === this.people[members.id]) continue;
 
                 let toPay = share;
@@ -78,6 +73,7 @@ class Activity extends Members {
 
             }
         }
+
     }
 
 

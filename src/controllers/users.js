@@ -191,6 +191,7 @@ exports.addFriend = async (req, res) => {
         .collection('friends')
         .doc(_b.otherUser)
         .get()
+
     if (checkAlreadyFriend.exists) {
         return res.status(208).json({
             message: "Friend already added!"
@@ -215,7 +216,7 @@ exports.addFriend = async (req, res) => {
 
     await batch.commit();
 
-    return res.status(208).json({})
+    return res.status(200).json({})
 }
 
 exports.fetchFriends = async (req, res) => {
@@ -239,4 +240,14 @@ exports.fetchFriends = async (req, res) => {
     // log(out)
 
     return out
+}
+
+exports.profile = async (body) => {
+    let user = await db.collection('users').doc(body.userId).get()
+
+    return {
+        user: user.data(),
+        id: user.id,
+        statusCode: 200
+    }
 }

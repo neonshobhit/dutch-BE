@@ -1,10 +1,8 @@
 const jwt = require("jsonwebtoken");
 const secret = require('../config/env').jwt.secret
 
-exports.checkValidation = async (req, res) => {
-    const {
-        token
-    } = req.body;
+exports.checkValidation = async (req, res, next) => {
+    const token = req.header('Authorization').split(' ')[1]
     let output;
     jwt.verify(token, secret, (err, user) => {
         if (err || !user) {
@@ -20,5 +18,12 @@ exports.checkValidation = async (req, res) => {
             }
         }
     });
+    if (output.statusCode == 200) {
+        next()
+    } else {
+        res.status(403).send({
+            error: 'Unauthorized'
+        })
+    }
     return output;
 }

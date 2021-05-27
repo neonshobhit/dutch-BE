@@ -3,8 +3,8 @@ class Members {
     // storing indices at which they'll represent in the graph.
     constructor(members) {
 
-        let people = {}        // ID -> index
-        let IDs = {}        // index -> ID
+        let people = {} // ID -> index
+        let IDs = {} // index -> ID
         let c = 0;
         for (; c < members.length; ++c) {
             people[members[c].userId] = c;
@@ -32,7 +32,7 @@ class Members {
 
     // Converting array graph to map, so to push back to database again.
 
-    convertmap(graph){
+    convertmap(graph) {
         let sz = this.size
         let IDs = this.IDs
         let map = {}
@@ -78,11 +78,11 @@ class Members {
         return map
     }
 
-    convertUserDues(userdues){
+    convertUserDues(userdues) {
         let sz = this.size;
         let IDs = this.IDs
         let usermap = {}
-        for (let i = 0; i < sz; ++i) {   
+        for (let i = 0; i < sz; ++i) {
             usermap[IDs[i]] = userdues[i];
         }
         return usermap;

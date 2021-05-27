@@ -1,34 +1,40 @@
 const router = require('express').Router()
-const event=require('../controllers/events')
-router.post('/newevent', (req, res) => {
-    event.create(req,res);
+const event = require('../controllers/events')
 
-    res.send("newevent")
+
+router.post('/newevent', async (req, res) => {
+    let out = await event.create(req, res);
+
+    res.status(out.statusCode).json(out)
 })
 
 
-router.post('/addmembers', (req, res) => {
-    event.addMembers(req,res);
+router.post('/addmembers', async (req, res) => {
+    let out = await event.addMembers(req, res);
 
-    res.send("member added")
+    res.status(out.statusCode).json(out)
 })
 
-router.post('/getdues', (req, res) => {
-    event.getDuesSummary(req,res);
+router.get('/getdues/:id', async (req, res) => {
+    let out = await event.getDuesSummary({
+        eventId: req.params.id
+    });
 
-    res.send("dues")
+    res.status(out.statusCode).json(out)
 })
 
-router.post('/getmembers', (req, res) => {
-    event.getDuesSummary(req,res);
+router.get('/getmembers/:id', async (req, res) => {
+    let out = await event.getMembersList({
+        eventId: req.params.id
+    });
 
-    res.send("members")
+    res.status(out.statusCode).json(out)
 })
 
-router.post('/display', (req, res) => {
-    event.display(req,res);
+router.post('/display', async (req, res) => {
+    let out = await event.display(req, res);
 
-    res.send("display")
+    res.status(out.statusCode).json(out)
 })
 
 module.exports = router

@@ -5,8 +5,12 @@ const {
     getQrCode,
     signin,
     addFriend,
-    fetchFriends
+    fetchFriends,
+    profile
 } = require('../controllers/users');
+const {
+    checkValidation
+} = require('../middleware/users')
 
 router.post('/add', add);
 router.post('/verify', verifyUser);
@@ -20,4 +24,12 @@ router.post('/fetchfriend', (req, res) => {
     //};
 })
 
+router.get('/profile', checkValidation, async (req, res) => {
+    // console.log(req.user)
+    let out = await profile({
+        userId: req.user.id
+    })
+
+    res.status(out.statusCode).json(out)
+})
 module.exports = router;
