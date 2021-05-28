@@ -3,6 +3,7 @@ const {
     firebase
 } = require('../config/firebase')
 const minimizingPayments = require('../services/minimizePayments')
+const updates=require('../services/updates')
 
 const calculateTotalAmount = (paidBy) => {
     let amount = paidBy.reduce((accum, element) => {
@@ -55,44 +56,7 @@ const addShareAndBudget = async (tr, eventInfo, event) => {
     }
 }
 
-const updateOwe = (changes, batch) => {
-    let getref = (i) => db.collection('friends').doc(i)
-    for (let i in changes) {
-        let updater = {}
 
-        for (let j in changes[i]) {
-            updater[`${j}.owe`] = firebase.firestore.FieldValue.increment(changes[i][j])
-        }
-        batch.update(getref(i), updater);
-    }
-}
-
-const updateEventDoc = (eventRef, batch, finalgraph) => {
-    batch.update(eventRef, {
-        graph: finalgraph,
-        stats: {
-            expenditure: firebase.firestore.FieldValue.increment(0),
-            share: {
-                "a": firebase.firestore.FieldValue.increment(0),
-            }
-        }
-    })
-}
-
-const updateUserDoc = (changes, batch) => {
-    let getref = (i) => db.collection('users').doc(i)
-    for (let i in changes) {
-        if (changes[i] > 0) {
-            batch.update(getref(i), {
-                toReceive: firebase.firestore.FieldValue.increment(changes[i]),
-            })
-        } else {
-            batch.update(getref(i), {
-                toPay: firebase.firestore.FieldValue.increment(-changes[i]), // storing only +ve values
-            })
-        }
-    }
-}
 
 exports.addTransaction = async (req, res) => {
     let tr = req.body;
@@ -135,9 +99,9 @@ exports.addTransaction = async (req, res) => {
         let userchanges = changes[1];
         let finalgraph = changes[2];
         batch.create(recordRef, entryData) // 1
-        updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
-        updateEventDoc(eventRef, batch, finalgraph) // 2., 5., 6. Remaining to pass data
-        updateUserDoc(userchanges, batch); // 4.
+        updates.updateOwe(graphchanges, batch); // 3. Remaining to pass changes map
+        updates.updateEventDoc(eventRef, batch, finalgraph) // 2., 5., 6. Remaining to pass data
+        updates.updateUserDoc(userchanges, batch); // 4.
 
 
         // let recordId = await db.collection("events").doc(tr.event.id).collection("records").add(entryData);
