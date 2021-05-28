@@ -17,12 +17,7 @@ router.post('/verify', verifyUser);
 router.post('/getCode', getQrCode);
 router.post('/signin', signin);
 router.post('/addfriend', addFriend);
-router.post('/fetchfriend', (req, res) => {
-    let out = fetchFriends(req, res);
-    //return res.send(out.statusCode).json{
-
-    //};
-})
+router.post('/fetchfriend', fetchFriends);
 
 router.get('/profile', checkValidation, async (req, res) => {
     // console.log(req.user)

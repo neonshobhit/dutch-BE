@@ -220,8 +220,7 @@ exports.addFriend = async (req, res) => {
 }
 
 exports.fetchFriends = async (req, res) => {
-    const userId = req.userId
-
+    const userId = req.body.userId
     let out = new Object()
     await db.collection('users').doc(userId).collection('friends').get()
         .then(snap => {
@@ -239,7 +238,7 @@ exports.fetchFriends = async (req, res) => {
         })
     // log(out)
 
-    return out
+    res.status(out.statusCode).json(out)
 }
 
 exports.profile = async (body) => {
