@@ -11,9 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "firebase-admin": "^9.7.0",
+    "firebase-functions": "^3.14.1",
     "jsonwebtoken": "^8.5.1",
     "log-to-file": "^2.0.2",
     "morgan": "^1.10.0",

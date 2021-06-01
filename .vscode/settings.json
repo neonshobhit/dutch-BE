@@ -1,0 +1,5 @@
+{
+  "files.insertFinalNewline": true,
+  "editor.formatOnSave": true,
+  "beautify.ignore": "end_with_newline"
+}
