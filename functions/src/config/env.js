@@ -5,4 +5,7 @@ module.exports = {
   server: {
     port: 3000,
   },
+  telegram: {
+    token: "1810384279:AAGAlmfpnp0rKSgaHImfpGVJj3c5SXTXyl8",
+  },
 };

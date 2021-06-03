@@ -1,2 +1,2 @@
 require = require("esm")(module)
-module.exports = require("./app.js")
+module.exports = require("./functions/src/app.js")
