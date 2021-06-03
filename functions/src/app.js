@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 // const morgan = require('morgan')
 
 
@@ -39,10 +40,12 @@ events.use("/events", require("./routers/event"));
 //     res.send("hello world")
 // })
 
+// if (process.env.ENV) {
+//   app.listen(require("./config/env").server.port, () => {
+//     console.log("server is up and running");
+//   });
+// }
 
-// app.listen(require('./config/env').server.port, () => {
-//     console.log("server is up and running")
-// })
 
 // exports.module = functions.https.onRequest(app);
 
