@@ -3,6 +3,9 @@ module.exports = {
     secret: "DUTCHAPPLICATION@1234512132sdfsdf",
   },
   server: {
-    port: 3001,
+    port: process.env.PORT,
+  },
+  telegram: {
+    token: "1810384279:AAGAlmfpnp0rKSgaHImfpGVJj3c5SXTXyl8",
   },
 };
