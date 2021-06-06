@@ -3,3 +3,4 @@ default.log
 src/config/serviceAccount.json
 functions/node_modules
 functions/src/config/serviceAccount.json
+functions/src/.env

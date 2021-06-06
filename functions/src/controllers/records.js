@@ -40,14 +40,14 @@ const addShareAndBudget = async (tr, eventInfo, event) => {
 
   if (eventInfo.stats && eventInfo.stats.budget) {
     await event.update({
-        stats: {
-          budget: eventInfo.stats.budget,
-          expenditure: ((eventInfo.stats.expenditure) ?
-            (eventInfo.stats.expenditure) :
-            0) + tempAmount,
-          share,
-        },
-      }).then((data) => {})
+      stats: {
+        budget: eventInfo.stats.budget,
+        expenditure: ((eventInfo.stats.expenditure) ?
+          (eventInfo.stats.expenditure) :
+          0) + tempAmount,
+        share,
+      },
+    }).then((data) => { })
       .catch((err) => console.log(err));
   } else {
     await event.update({
@@ -123,6 +123,7 @@ exports.addTransaction = async (req, res) => {
         name: tr.event.name,
       },
       share: tr.share,
+      timestamp: new Date().getTime(),
       // payment: tr.payment,
 
     };
@@ -195,6 +196,7 @@ exports.addBannerActivity = async (req, res) => {
       message: {
         message: newMesssage,
       },
+      timestamp: new Date().getTime()
     };
     const recordId = await db
       .collection("events")
@@ -247,6 +249,7 @@ exports.addMessageActivity = async (req, res) => {
         },
         message: newMesssage,
       },
+      timestamp: new Date().getTime()
     };
 
     const recordId = await db
@@ -267,3 +270,96 @@ exports.addMessageActivity = async (req, res) => {
   }
   return out;
 };
+
+//Settlement Activity 
+exports.addSettlementActivity = async (req, res) => {
+  try {
+    let userId = req.user.userId ? req.user.userId : "";
+
+    if (userId === "") {
+      userId = req.user.id ? req.user.id : "";
+    }
+
+    const {
+      eventId,
+      ammount,
+      otherEmail
+    } = req.body;
+    const event = db.collection("events").doc(eventId);
+    const eventInfo = (await event.get()).data();
+
+    if (!eventInfo) {
+      throw Error("Invalid Event");
+    }
+
+    const snapshot = await db
+      .collection("users")
+      .where("email", "==", otherEmail)
+      .get();
+    if (snapshot.empty) {
+      return {
+        statusCode: 401,
+        message: "Friend is not Found."
+      }
+    }
+    let otherUserId;
+    snapshot.forEach((e) => otherUserId = e.id);
+
+    const entryData = {
+      type: "settlement",
+      from: userId,
+      to: otherUserId,
+      ammount,
+      timestamp: new Date().getTime()
+    }
+
+    const recordId = await db
+      .collection("events")
+      .doc(eventId)
+      .collection("records")
+      .add(entryData);
+
+    return {
+      statusCode: 200,
+      message: "Added Settlement."
+    }
+  } catch (err) {
+    return {
+      statusCode: 501,
+      error: err.message
+    }
+  }
+}
+
+exports.fetchRecords = async (req, res) => {
+  try {
+    let {
+      eventId,
+      limit,
+      offset,
+      timestamp
+    } = req.body;
+
+    const fetchedData = await db
+      .collection("events")
+      .doc(eventId)
+      .collection("records")
+      .orderBy("timestamp", "desc")
+      .limit(limit)
+      .offset(offset)
+      .get();
+    let data = []
+    for (let x of fetchedData.docs) {
+      data.push(x.data())
+    }
+    return {
+      statusCode: 200,
+      fetchedData: data
+    }
+  } catch (err) {
+    return {
+      statusCode: 501,
+      error: err.message
+    };
+  }
+}
