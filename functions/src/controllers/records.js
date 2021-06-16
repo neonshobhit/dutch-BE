@@ -40,14 +40,14 @@ const addShareAndBudget = async (tr, eventInfo, event) => {
 
   if (eventInfo.stats && eventInfo.stats.budget) {
     await event.update({
-      stats: {
-        budget: eventInfo.stats.budget,
-        expenditure: ((eventInfo.stats.expenditure) ?
-          (eventInfo.stats.expenditure) :
-          0) + tempAmount,
-        share,
-      },
-    }).then((data) => { })
+        stats: {
+          budget: eventInfo.stats.budget,
+          expenditure: ((eventInfo.stats.expenditure) ?
+            (eventInfo.stats.expenditure) :
+            0) + tempAmount,
+          share,
+        },
+      }).then((data) => {})
       .catch((err) => console.log(err));
   } else {
     await event.update({
@@ -90,16 +90,16 @@ const updateEventDoc = (eventRef, batch, finalgraph) => {
 const updateUserDoc = (changes, batch) => {
   const getref = (i) => db.collection("users").doc(i);
   for (const i in changes) {
-    if (changes[i] > 0) {
+    if (changes[i] < 0) {
       batch.update(getref(i), {
-        toReceive: firebase.firestore.FieldValue.increment(changes[i]),
+        toReceive: firebase.firestore.FieldValue.increment(-changes[i]),
       });
     } else {
       batch.update(getref(i), {
         toPay: firebase
           .firestore
           .FieldValue
-          .increment(-changes[i]), // storing only +ve values
+          .increment(changes[i]), // storing only +ve values
       });
     }
   }
