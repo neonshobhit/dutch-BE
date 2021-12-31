@@ -2,9 +2,10 @@ const {
   db,
 } = require("../config/firebase");
 const qrCodeImage = require("../services/QRcode");
-const jwt = require("jsonwebtoken");
-const secret = require("../config/env").jwt.secret;
 const speakeasy = require("speakeasy");
+const {
+  encode,
+} = require("../services/auth");
 
 exports.add = async (req, res) => {
   const snapshot = await db
@@ -26,28 +27,34 @@ exports.add = async (req, res) => {
     const docId = await newUser.collection("userSecret").add({
       otp: otp,
     });
+    const doc = await newUser.collection("userSecret").doc("telegram").set({
+      otp: otp,
+    });
     await newUser.update({
       secretId: docId.id,
     });
+    // telegram 
+
     // Making an empty friend document, so to maintain consistency.
     // Not waiting because,
     // this request can be completed even after the execution of results.
     await db.collection("friends").doc(newUser.id).set({});
 
     const data = {
-      newUser: (await newUser.get()).data(),
-      id: newUser.id,
+      statusCode: 200,
+      email: req.body.email,
       otp,
     };
-    return res.status(200).json(data);
+    return data;
   } else {
     let id;
     snapshot.forEach((e) => id = e.id);
     const data = {
+      statusCode: 403,
       id,
       error: "Email Id already exists",
     };
-    return res.status(403).json(data);
+    return data;
   }
 };
 
@@ -61,9 +68,10 @@ exports.verifyUser = async (req, res) => {
     .where("email", "==", req.body.email)
     .get();
   if (snapshot.empty) {
-    return res.status(401).json({
+    return {
+      statusCode: 401,
       error: "Unauthorized person!",
-    });
+    };
   } else {
     let id;
     snapshot.forEach((e) => id = e.id);
@@ -78,24 +86,27 @@ exports.verifyUser = async (req, res) => {
           await user.update({
             isVerified: true,
           });
-          return res.status(200).json({
+          return {
             statusCode: 200,
             message: "User Verified Done.",
-          });
+          };
         } else {
-          return res.status(401).json({
+          return {
+            statusCode: 401,
             error: "Otp Doesn't match",
-          });
+          };
         }
       } else {
-        return res.status(200).json({
+        return {
+          statusCode: 200,
           message: "User is Already verified.",
-        });
+        };
       }
     } catch (err) {
-      return res.status(501).json({
+      return {
+        statusCode: 501,
         error: "Internal Server Error.",
-      });
+      };
     }
   }
 };
@@ -109,9 +120,10 @@ exports.getQrCode = async (req, res) => {
     .where("email", "==", email)
     .get();
   if (snapshot.empty) {
-    return res.status(401).json({
+    return {
+      statusCode: 401,
       error: "Unauthorized Person",
-    });
+    };
   } else {
     let id;
     snapshot.forEach((e) => id = e.id);
@@ -127,19 +139,21 @@ exports.getQrCode = async (req, res) => {
         secret: secretCode,
       });
       if (qrCodeOutput.flag) {
-        return res.status(200).json({
+        return {
+          statusCode: 200,
           image_url: qrCodeOutput.url,
-        });
+        };
       } else {
-        return res.status(500).json({
+        return {
+          statusCode: 500,
           error: "Inernal Server Error",
-        });
+        };
       }
     } catch (err) {
-      console.log(err);
-      return res.status(501).json({
+      return {
+        statusCode: 501,
         error: "Internal Server Error.",
-      });
+      };
     }
   }
 };
@@ -153,9 +167,10 @@ exports.signin = async (req, res) => {
     .collection("users")
     .where("email", "==", email).get();
   if (snapshot.empty) {
-    return res.status(401).json({
+    return {
+      statusCode: 401,
       error: "Unauthorized Person",
-    });
+    };
   } else {
     try {
       let id;
@@ -172,33 +187,44 @@ exports.signin = async (req, res) => {
         token: verificationOtp,
       });
       if (tokenValidates) {
-        const token = jwt.sign({
-          email,
-          id,
-        }, secret);
-        return res.status(200).json({
-          user: {
-            email,
-            id,
-          },
+        const token = encode(email, id);
+        return {
+          statusCode: 200,
           message: "User Signin Done.",
           token,
-        });
+        };
       } else {
-        return res.status(400).json({
+        return {
+          statusCode: 400,
           error: "Otp Doen't Match",
-        });
+        };
       }
     } catch (err) {
-      return res.status(501).json({
+      return {
+        statusCode: 501,
         error: "Internal Server Error.",
-      });
+      };
     }
   }
 };
 
 exports.addFriend = async (req, res) => {
-  const _b = req.body;
+  const _b = {};
+  _b["userId"] = req.user.userId;
+
+  const snapshot = await db
+    .collection("users")
+    .where("email", "==", req.body.otherEmail)
+    .get();
+  let id;
+  snapshot.forEach((e) => id = e.id);
+  if (snapshot.empty) {
+    return {
+      statusCode: 401,
+      message: "Other User Doesn't exist.",
+    };
+  }
+  _b["otherUser"] = id;
 
   const checkAlreadyFriend = await db
     .collection("users")
@@ -208,9 +234,10 @@ exports.addFriend = async (req, res) => {
     .get();
 
   if (checkAlreadyFriend.exists) {
-    return res.status(208).json({
+    return {
+      statusCode: 208,
       message: "Friend already added!",
-    });
+    };
   }
 
   // If both are added to each other than only they'll be saved,
@@ -241,31 +268,35 @@ exports.addFriend = async (req, res) => {
 
   await batch.commit();
 
-  return res.status(200).json({});
+  return {
+    statusCode: 200,
+  };
 };
 
 exports.fetchFriends = async (req, res) => {
   const userId = req.user.id;
 
-  const out = {};
+  let out = {};
   await db.collection("users").doc(userId).collection("friends").get()
     .then((snap) => {
-      out.statusCode = 200;
-      out.data = [];
+      const data = [];
       snap.forEach((e) => {
-        out.data.push({
+        data.push({
           [e.id]: e.data(),
         });
       });
+      out = {
+        statusCode: 200,
+        data,
+      };
     })
     .catch((err) => {
-      out.statusCode = 400;
-      out.error = err.message;
+      out = {
+        statusCode: 400,
+        error: err.message,
+      };
     });
-
-  const statusCode = out.statusCode;
-  delete out.statusCode;
-  return res.status(statusCode).json(out);
+  return out;
 };
 
 exports.profile = async (body) => {

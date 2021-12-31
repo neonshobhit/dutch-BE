@@ -3,7 +3,7 @@
 /* eslint-disable require-jsdoc */
 /* eslint-disable guard-for-in */
 const Members = require("./Members");
-
+const math = require('mathjs');
 class Activity extends Members {
   constructor(members, map) {
     // Assign IDs as indices for the graph.
@@ -69,10 +69,10 @@ class Activity extends Members {
         const due = this.graph[this.people[members.id]][this.people[owedBy.id]];
         const contribute = Math.min(due, share);
 
-        this.graph[this.people[members.id]][this.people[owedBy.id]] -= contribute;
-        toPay -= contribute;
+        this.graph[this.people[members.id]][this.people[owedBy.id]] = math.add(this.graph[this.people[members.id]][this.people[owedBy.id]], contribute);
+        toPay = math.subtract(toPay, contribute);
 
-        this.graph[this.people[owedBy.id]][this.people[members.id]] += toPay;
+        this.graph[this.people[owedBy.id]][this.people[members.id]] = math.add(this.graph[this.people[owedBy.id]][this.people[members.id]], toPay);
       }
     }
   }
@@ -87,6 +87,7 @@ class Activity extends Members {
         changegraph[i][j] = newgraph[i][j] - oldgraph[i][j];
       }
     }
+    this.justchanges = changegraph;
     const newchange = this.convertmap(changegraph);
 
     return newchange;
@@ -95,11 +96,11 @@ class Activity extends Members {
     const receivable = {};
     let rec = 0;
     for (let i = 0; i < this.len; ++i) {
-      if (this.graph[q][i] === 0) continue;
+      if (this.justchanges[q][i] === 0) continue;
 
 
-      receivable.i = this.graph[q][i];
-      rec += this.graph[q][i];
+      receivable.i = this.justchanges[q][i];
+      rec += this.justchanges[q][i];
     }
     return rec;
   }
@@ -108,11 +109,11 @@ class Activity extends Members {
     const payable = {};
     let pay = 0;
     for (let i = 0; i < this.len; ++i) {
-      if (this.graph[i][q] === 0) continue;
+      if (this.justchanges[i][q] === 0) continue;
 
 
-      payable.i = this.graph[i][q];
-      pay += this.graph[i][q];
+      payable.i = this.justchanges[i][q];
+      pay += this.justchanges[i][q];
     }
 
     return pay;

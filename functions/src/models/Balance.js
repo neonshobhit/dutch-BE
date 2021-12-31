@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 const Activity = require("./Activity");
-
+const math = require('mathjs');
 class Balance {
   constructor(graph) {
     const credit = [];
@@ -67,6 +67,7 @@ class Balance {
     let p = this.credit.length;
     let q = this.debit.length;
 
+    let maxloop = p + q;
 
     {
       const dummy = [];
@@ -90,13 +91,13 @@ class Balance {
       if (debitamount > creditamount) {
         const CR = creditamount;
         graph[debitfrom][creditto] = CR;
-        this.debit[q - 1].amount -= CR;
+        this.debit[q - 1].amount = math.subtract(this.debit[q - 1].amount, CR);
 
         p--;
       } else if (debitamount < creditamount) {
         const DR = debitamount;
         graph[debitfrom][creditto] = DR;
-        this.credit[p - 1].amount -= DR;
+        this.credit[p - 1].amount = math.subtract(this.credit[p - 1].amount, DR);
 
         q--;
       } else {
@@ -105,6 +106,11 @@ class Balance {
 
         p--;
         q--;
+      }
+
+      maxloop--;
+      if (maxloop < 0) { // loop will run fixed number of times 
+        break;
       }
     }
 

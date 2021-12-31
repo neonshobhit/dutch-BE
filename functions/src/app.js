@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 require("./routers/telegram");
 const app = express();
-require("dotenv").config();
+require('dotenv').config();
 // const morgan = require('morgan')
 
 
@@ -29,10 +29,9 @@ events.use("/events", require("./routers/event"));
 // app.use("/friends", require("./routers/friends"));
 // app.use("/events", require("./routers/event"));
 
-// app.get('*', (req, res) => {
-//     res.send("hello world")
-// })
-
+app.get('*', (req, res) => {
+  res.send("hello world")
+})
 
 // app.post('*', (req, res) => {
 //     //console.log(req.body);
@@ -41,15 +40,14 @@ events.use("/events", require("./routers/event"));
 //     res.send("hello world")
 // })
 
-// if (process.env.ENV) {
-//   app.listen(require("./config/env").server.port, () => {
-//     console.log("server is up and running");
-//   });
-// }
-
+if (process.env.ENV) {
+  app.listen(require('./config/env').server.port, () => {
+    console.log("server is up and running")
+  })
+}
 // exports.module = functions.https.onRequest(app);
 
 exports.users = functions.https.onRequest(users);
 exports.records = functions.https.onRequest(records);
 exports.friends = functions.https.onRequest(friends);
-exports.events = functions.https.onRequest(events);
+exports.ev = functions.https.onRequest(events);

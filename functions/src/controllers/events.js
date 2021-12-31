@@ -101,7 +101,7 @@ exports.getMembersList = async (_b) => {
 
   return {
     statusCode: 200,
-    memebrs: (await ref.get()).data().members,
+    members: (await ref.get()).data().members,
   };
 };
 
