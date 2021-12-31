@@ -245,7 +245,7 @@ exports.addFriend = async (req, res) => {
 };
 
 exports.fetchFriends = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user.id;
 
   const out = {};
   await db.collection("users").doc(userId).collection("friends").get()
@@ -262,9 +262,10 @@ exports.fetchFriends = async (req, res) => {
       out.statusCode = 400;
       out.error = err.message;
     });
-  // log(out)
 
-  return out;
+  const statusCode = out.statusCode;
+  delete out.statusCode;
+  return res.status(statusCode).json(out);
 };
 
 exports.profile = async (body) => {

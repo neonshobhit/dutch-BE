@@ -149,7 +149,7 @@ bot.onText(/\/addTransaction/, async (msg) => {
 
       bot.onReplyToMessage(PaidBy.chat.id, askAmount.message_id, (amount) => {
         // eslint-disable-next-line max-len
-        const msg = `Are you sure that ${PaidBy.text} paid ${amount.text} in ${selectedEvent.text}?`;
+        const msg = `Are you sure that ${PaidBy.text} paid ${amount.text} in ${selectedEvent.text}? (Swipe and reply is must)`;
         bot.sendMessage(PaidBy.chat.id, msg, {
           "reply_markup": {
             force_reply: true,
