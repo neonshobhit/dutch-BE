@@ -4,3 +4,5 @@ src/config/serviceAccount.json
 functions/node_modules
 functions/src/config/serviceAccount.json
 functions/.env
+/.env
+package-lock.json
