@@ -3,7 +3,7 @@
 /* eslint-disable require-jsdoc */
 /* eslint-disable guard-for-in */
 const Members = require("./Members");
-const math = require('mathjs');
+const math = require("mathjs");
 class Activity extends Members {
   constructor(members, map) {
     // Assign IDs as indices for the graph.

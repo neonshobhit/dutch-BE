@@ -1,12 +1,13 @@
 /* eslint-disable max-len */
 const TelegramBot = require("node-telegram-bot-api");
+const Telegram = require('../models/Telegram').Telegram;
+const controller = require('../controllers/telegram');
 
 const token = require("../config/env").telegram.token;
 
 const bot = new TelegramBot(token, {
   polling: true,
 });
-
 
 const obj = {
   "event1": [
@@ -77,19 +78,18 @@ const obj = {
 
 // eslint-disable-next-line prefer-const
 let people = {};
-
+// let riddhi = 1867755302;
+// let swapnil = 1092983868;
+// let preeti = 838931590;
+// let sparshi = 1074202347;
+// bot.sendMessage(sparshi, '')
+// bot.sendMessage(preeti, 'Dekhhhhhhhhhhh');
+// bot.sendMessage(swapnil, 'mil gya bhai, thanks')
+// bot.sendMessage(riddhi, "discord pr bhi bna skta hu")
 const startOrHelp = (msg) => {
-  const options = `
-    /addTransaction\n/linkAccount\n/myLinkedEmail\n/getEvents\n/linkAccount\n/myLinkedEmail\n/getProfile\n/getFriendsDue
-  `;
-
-  bot.sendMessage(msg.chat.id, options, {
-    entities: [{
-      type: "email",
-    }],
-  });
-
-  // bot.sendMessage(msg.chat.id, options);
+  // console.log(msg);
+  const opt = Telegram.generateMessage(Telegram.HELP_MESSAGE);
+  bot.sendMessage(msg.chat.id, opt[0], opt[1]);
 };
 
 bot.onText(/\/start/, startOrHelp);
@@ -175,36 +175,21 @@ bot.onText(/\/getEvents/, (msg) => {
 });
 
 bot.onText(/\/linkAccount/, async (msg) => {
-  const msgReply = await bot.sendMessage(msg.chat.id, "Email?", {
-    reply_markup: {
-      force_reply: true,
-    },
-  });
+  let opt = Telegram.generateMessage(Telegram.LINK_ACCOUNT);
+  const msgReply = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
 
-  // console.log(msgReply.message_id);
-  bot.onReplyToMessage(msg.chat.id, msgReply.message_id, (email) => {
-    // console.log(email);
-    people[email.text] = email.chat.username;
-    // console.log(people);
-
+  bot.onReplyToMessage(msg.chat.id, msgReply.message_id, async (email) => {
+    const response = await controller.linkAccount(email.from, email.text.trim());
+    if (!response.status) return bot.sendMessage(msg.chat.id, response.error);
     bot.sendMessage(msg.chat.id, "Success");
   });
 });
 
 bot.onText(/\/myLinkedEmail/, async (msg) => {
-  let email = undefined;
-
-  // eslint-disable-next-line guard-for-in
-  for (const x in people) {
-    // console.log(x);
-    if (people[x] === msg.chat.username) {
-      email = x;
-      bot.sendMessage(msg.chat.id, email);
-      return;
-    }
-  }
-
-  bot.sendMessage(msg.chat.id, "Not linked yet. Please link by /linkAccount");
+  const resp = await controller.getLinkedAccount(msg.from);
+  const reply = resp.status ? resp.account.email : resp.error;
+  await controller.sendMessage(reply, msg.chat.id, Telegram.getString(Telegram.LINK_ACCOUNT), Telegram.getString(Telegram.ERROR_MSG));
+  bot.sendMessage(msg.chat.id, reply);
 });
 
 bot.onText(/\/getProfile/, async (msg) => {

@@ -6,6 +6,6 @@ module.exports = {
     port: process.env.PORT,
   },
   telegram: {
-    token: "1810384279:AAGAlmfpnp0rKSgaHImfpGVJj3c5SXTXyl8",
+    token: process.env.TELEGRAM_TOKEN,
   },
 };
