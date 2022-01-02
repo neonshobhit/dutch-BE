@@ -4,16 +4,18 @@ const {
 const Telegram = require('../models/Telegram').Telegram;
 
 class Notification {
-  constructor(curFLow, nextFlow, msg) {
-    this.curFLow = curFLow;
+  constructor(curFlow, nextFlow, msg, id, notConversation) {
+    this.msgId = id
+    this.curFlow = curFlow;
     this.nextFlow = nextFlow;
     this.curMessage = msg;
+    this.isConversation = !notConversation; // if its undefined, it must be true
     this.timestamp = new Date().getTime();
   }
 }
 
-exports.sendMessage = async (msg, id, curFLow, nextFlow) => {
-  let entry = new Notification(curFLow, nextFlow, msg);
+exports.storeMessage = async (msg, msgId, id, curFLow, nextFlow) => {
+  let entry = new Notification(curFLow, nextFlow, msg, msgId);
   entry = JSON.parse(JSON.stringify(entry));
   await db.collection('telegram').doc(id + '').collection('notifications').add(entry);
 };
@@ -32,7 +34,10 @@ exports.getLastMessage = async id => {
     id: e.id
   });
 
-  return msg;
+  return {
+    status: true,
+    msg: msg
+  };
 }
 
 exports.linkAccount = async (from, email) => {
@@ -96,6 +101,72 @@ exports.getLinkedAccount = async (from) => {
       error: 'USER_DOES_NOT_EXIST'
     }
   }
+  return {
+    status: false,
+    error: 'ACCOUNT_NOT_LINKED'
+  }
+}
+
+exports.getProfile = async (from) => {
+  const account = await db.collection('telegram').doc(from.id + '').get()
+  if (account.exists) {
+    let accountDetails = account.data();
+    const user = await db.collection('users').doc(accountDetails.userId).get()
+    if (user.exists) {
+      return {
+        status: true,
+        account: user.data(),
+      };
+    }
+
+    return {
+      status: false,
+      error: 'ACCOUNT_LINKED_TO_UNKNOWN_USER'
+    }
+  }
+
+  return {
+    status: false,
+    error: 'ACCOUNT_NOT_LINKED'
+  }
+}
+
+exports.getSentMessage = async (msg) => {
+  const notification = await db.collection('telegram').doc(msg.chat.id + '').collection('notifications').where('msgId', '==', msg.reply_to_message.message_id).get();
+  if (notification.empty) {
+    return {
+      status: false,
+      error: 'SENT_MESSAGE_NOT_FOUND'
+    }
+  }
+
+  let noti = undefined;
+  notification.forEach((e) => noti = e.data());
+
+  return {
+    status: true,
+    msg: noti
+  }
+}
+
+exports.listEvents = async (from) => {
+  const account = await db.collection('telegram').doc(from.id + '').get()
+  if (account.exists) {
+    let accountDetails = account.data();
+    const events = await db.collection('users').doc(accountDetails.userId).collection('events').get()
+    if (!events.empty) {
+      return {
+        status: true,
+        events: events.docs.map(e => e.data()),
+      };
+    }
+
+    return {
+      status: false,
+      error: 'NO_EVENTS'
+    }
+  }
+
   return {
     status: false,
     error: 'ACCOUNT_NOT_LINKED'

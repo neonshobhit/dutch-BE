@@ -53,4 +53,12 @@ router.get("/profile", decode, async (req, res) => {
 
   res.status(out.statusCode).json(out);
 });
+
+router.post('/listEvents', decode, async (req, res) => {
+  const out = await user.listEvents({
+    userId: req.body.userId
+  })
+
+  res.status(out.statusCode).json(out);
+})
 module.exports = router;

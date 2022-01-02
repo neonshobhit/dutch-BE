@@ -42,8 +42,9 @@ app.get("*", (req, res) => {
 // })
 
 if (process.env.ENV) {
-  app.listen(require("./config/env").server.port, () => {
-    console.log("server is up and running");
+  const port = require("./config/env").server.port
+  app.listen(port, () => {
+    console.log("server is up and running", port);
   });
 }
 // exports.module = functions.https.onRequest(app);

@@ -25,6 +25,15 @@ exports.create = async (req, res) => {
     }],
   });
 
+  await db.collection('users')
+    .doc(_b.userId)
+    .collection('events')
+    .doc(ev.id)
+    .set({
+      name: _b.name,
+      imageURL: _b.imageURL,
+    })
+
   await db.collection("events")
     .doc(ev.id)
     .collection("records")

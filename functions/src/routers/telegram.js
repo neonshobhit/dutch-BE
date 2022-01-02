@@ -80,12 +80,10 @@ const obj = {
 let people = {};
 // let riddhi = 1867755302;
 // let swapnil = 1092983868;
+// let testGroup = -750293094;
+
 // let preeti = 838931590;
 // let sparshi = 1074202347;
-// bot.sendMessage(sparshi, '')
-// bot.sendMessage(preeti, 'Dekhhhhhhhhhhh');
-// bot.sendMessage(swapnil, 'mil gya bhai, thanks')
-// bot.sendMessage(riddhi, "discord pr bhi bna skta hu")
 const startOrHelp = (msg) => {
   // console.log(msg);
   const opt = Telegram.generateMessage(Telegram.HELP_MESSAGE);
@@ -166,34 +164,33 @@ bot.onText(/\/addTransaction/, async (msg) => {
   });
 });
 
-bot.onText(/\/getEvents/, (msg) => {
-  bot.sendMessage(msg.chat.id, JSON.stringify(obj), {
-    // reply_markup: {
-    //   force_reply: true,
-    // },
-  });
+bot.onText(/\/getEvents/, async (msg) => {
+
+  const events = await controller.listEvents(msg.from);
+  const opt = Telegram.generateMessage(Telegram.LIST_EVENTS, events);
+  const sentMessage = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
+  await controller.storeMessage(sentMessage.text, sentMessage.message_id, sentMessage.chat.id, Telegram.getString(Telegram.LIST_EVENTS), Telegram.getString(Telegram.SUCCESS));
 });
 
 bot.onText(/\/linkAccount/, async (msg) => {
   let opt = Telegram.generateMessage(Telegram.LINK_ACCOUNT);
-  const msgReply = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
-
-  bot.onReplyToMessage(msg.chat.id, msgReply.message_id, async (email) => {
-    const response = await controller.linkAccount(email.from, email.text.trim());
-    if (!response.status) return bot.sendMessage(msg.chat.id, response.error);
-    bot.sendMessage(msg.chat.id, "Success");
-  });
+  const response = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
+  await controller.storeMessage(response.text, response.message_id, msg.chat.id, Telegram.getString(Telegram.LINK_ACCOUNT), Telegram.getString(Telegram.LINKING_EMAIL_ID));
 });
 
 bot.onText(/\/myLinkedEmail/, async (msg) => {
   const resp = await controller.getLinkedAccount(msg.from);
   const reply = resp.status ? resp.account.email : resp.error;
-  await controller.sendMessage(reply, msg.chat.id, Telegram.getString(Telegram.LINK_ACCOUNT), Telegram.getString(Telegram.ERROR_MSG));
-  bot.sendMessage(msg.chat.id, reply);
+  const response = await bot.sendMessage(msg.chat.id, reply);
+  await controller.storeMessage(response.text, response.message_id, msg.chat.id, Telegram.getString(Telegram.LINKING_EMAIL_ID), Telegram.getString(Telegram.SUCCESS));
+
 });
 
 bot.onText(/\/getProfile/, async (msg) => {
-  bot.sendMessage(msg.chat.id, "Yet to do. Please stay tuned.");
+  const profile = await controller.getProfile(msg.from);
+  const opt = Telegram.generateMessage(Telegram.GET_PROFILE, profile.account);
+  const sentMessage = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
+  await controller.storeMessage(sentMessage.text, sentMessage.message_id, sentMessage.chat.id, Telegram.getString(Telegram.GET_PROFILE), Telegram.getString(Telegram.SUCCESS));
 });
 
 bot.onText(/\/getFriendsDue/, async (msg) => {
@@ -204,3 +201,44 @@ bot.onText(/\/getFriendsDue/, async (msg) => {
 });
 
 // Send settlement notification
+
+// Will get all texts. Need to identify what flow it is.
+bot.on('text', async (msg) => {
+  console.log(msg)
+  const isCommand = /\/[a-z]+/.test(msg.text);
+  const isGroup = msg.chat.type === 'supergroup';
+  if (isGroup && !/@Dutchbebot/.test(msg.text)) return;
+  if (isCommand) return;
+  const isReply = msg.reply_to_message
+  let lastMsg
+  if (!isReply) {
+    const last = await controller.getLastMessage(msg.chat.id);
+    if (!last.status) return bot.sendMessage(msg.chat.id, last.error);
+    lastMsg = last;
+  } else {
+    const notification = await controller.getSentMessage(msg);
+    if (!notification.status) return bot.sendMessage(msg.chat.id, notification.error);
+    lastMsg = notification;
+  }
+
+  lastMsg.msg.curFlow = Telegram.getWrapper(lastMsg.msg.curFlow);
+  lastMsg.msg.nextFlow = Telegram.getWrapper(lastMsg.msg.nextFlow);
+
+  let opt, params, curFlow, nextFlow;
+  if (lastMsg.msg.nextFlow === Telegram.LINKING_EMAIL_ID) {
+    const response = await controller.linkAccount(msg.from, msg.text.trim());
+    if (!response.status) return bot.sendMessage(msg.chat.id, response.error);
+
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow)
+    nextFlow = Telegram.getString(Telegram.SUCCESS);
+  } else {
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow);
+    nextFlow = Telegram.getString(Telegram.ERROR_MSG);
+  }
+
+
+
+  opt = Telegram.generateMessage(lastMsg.msg.nextFlow, params);
+  const response = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
+  await controller.storeMessage(response.text, response.message_id, msg.chat.id, curFlow, nextFlow);
+})
