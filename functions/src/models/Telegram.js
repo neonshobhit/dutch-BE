@@ -6,6 +6,10 @@ let helpMsg = 'HELP_MESSAGE',
   success = 'SUCCESS',
   profile = 'GET_PROFILE',
   linkEv = 'LIST_EVENTS',
+  addTrn = 'ADD_TRANSACTION',
+  askPaidBy = 'PAID_BY',
+  askAmount = 'GET_AMOUNT',
+  confPay = 'CONFIRM_PAYMENT',
   errorMsg = 'ERROR_MESSAGE';
 
 class Telegram {
@@ -16,6 +20,10 @@ class Telegram {
   static LINKING_EMAIL_ID = new Telegram(linkEmail);
   static GET_PROFILE = new Telegram(profile);
   static LIST_EVENTS = new Telegram(linkEv);
+  static ADD_TRANSACTION = new Telegram(addTrn);
+  static ASK_PAID_BY = new Telegram(askPaidBy);
+  static CONFIRM_PAYMENT = new Telegram(confPay);
+  static GET_AMOUNT = new Telegram(askAmount);
   static SUCCESS = new Telegram(success);
   static ERROR_MSG = new Telegram(errorMsg);
 
@@ -38,6 +46,14 @@ class Telegram {
         return profile;
       case this.LIST_EVENTS:
         return linkEv;
+      case this.ADD_TRANSACTION:
+        return addTrn;
+      case this.ASK_PAID_BY:
+        return askPaidBy;
+      case this.CONFIRM_PAYMENT:
+        return confPay;
+      case this.GET_AMOUNT:
+        return askAmount;
       case this.SUCCESS:
         return success;
       case this.ERROR_MSG:
@@ -60,6 +76,14 @@ class Telegram {
         return this.GET_PROFILE;
       case linkEv:
         return this.LIST_EVENTS;
+      case addTrn:
+        return this.ADD_TRANSACTION;
+      case askPaidBy:
+        return this.ASK_PAID_BY;
+      case confPay:
+        return this.CONFIRM_PAYMENT;
+      case askAmount:
+        return this.GET_AMOUNT;
       case success:
         return this.SUCCESS;
       case errorMsg:
@@ -92,22 +116,22 @@ class Telegram {
       }
 
       case this.SELECT_EVENT: {
-        let msg = 'Please select event';
+        let msg = 'Who paid?';
         let options = {
           "reply_markup": {
             force_reply: true,
             one_time_keyboard: true,
+            selective: true,
             inline_keyboard: [],
           },
           "reply_to_message_id": params.message_id,
         }
 
-        params.events.forEach((value, index, arr) => {
-          const opt = [{
-            text: value.name,
-            switch_inline_query_current_chat: value.name
-          }]
-          options.reply_markup.inline_keyboard.push(opt)
+        params.users.forEach((v, ind, arr) => {
+          options.reply_markup.inline_keyboard.push([{
+            text: v.name,
+            switch_inline_query_current_chat: v.name,
+          }])
         })
         return [msg, options];
       }
@@ -159,6 +183,68 @@ class Telegram {
         return [msg, options];
       }
 
+      case this.ADD_TRANSACTION: {
+        let msg = "Please select event"
+        let options = {
+          "reply_markup": {
+            force_reply: true,
+            one_time_keyboard: true,
+            inline_keyboard: [],
+          },
+          "reply_to_message_id": params.message_id,
+        }
+        params.events.forEach((v, ind, arr) => {
+          options.reply_markup.inline_keyboard.push([{
+            text: v.name,
+            switch_inline_query_current_chat: v.name,
+          }])
+        })
+
+        return [msg, options];
+      }
+
+      case this.ASK_PAID_BY: {
+        let msg = 'Amount?';
+        let options = {
+          "reply_markup": {
+            force_reply: true,
+            one_time_keyboard: true,
+            selective: true,
+            inline_keyboard: [],
+          },
+          "reply_to_message_id": params.message_id,
+        }
+
+        options.reply_markup.inline_keyboard.push([{
+          text: ' ',
+          switch_inline_query_current_chat: ' ',
+        }])
+        return [msg, options];
+      }
+
+      case this.GET_AMOUNT: {
+        let msg = `You sure that ${params.user} paid ${params.amount} in ${params.eventName}?`
+        let options = {
+          "reply_markup": {
+            force_reply: true,
+            one_time_keyboard: true,
+            selective: true,
+            keyboard: [
+              ["@Dutchbebot Yes"],
+              ["@Dutchbebot No"],
+            ],
+          },
+        }
+
+        return [msg, options];
+      }
+
+      case this.CONFIRM_PAYMENT: {
+        let msg = 'Success'
+        let options = {}
+        return [msg, options]
+
+      }
 
       case this.SUCCESS: {
         let msg = 'Success';

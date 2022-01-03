@@ -32,6 +32,7 @@ exports.create = async (req, res) => {
     .set({
       name: _b.name,
       imageURL: _b.imageURL,
+      eventId: ev.id,
     })
 
   await db.collection("events")
@@ -110,6 +111,7 @@ exports.getMembersList = async (_b) => {
 
   return {
     statusCode: 200,
+    status: true,
     members: (await ref.get()).data().members,
   };
 };

@@ -2,6 +2,8 @@
 const TelegramBot = require("node-telegram-bot-api");
 const Telegram = require('../models/Telegram').Telegram;
 const controller = require('../controllers/telegram');
+const eventsController = require('../controllers/events');
+const recordController = require('../controllers/records');
 
 const token = require("../config/env").telegram.token;
 
@@ -9,81 +11,6 @@ const bot = new TelegramBot(token, {
   polling: true,
 });
 
-const obj = {
-  "event1": [
-    [{
-      text: "user1",
-      switch_inline_query_current_chat: "user1",
-    }],
-    [{
-      text: "user2",
-      switch_inline_query_current_chat: "user2",
-    }],
-  ],
-  "event2": [
-    [{
-      text: "user1",
-      switch_inline_query_current_chat: "user1",
-    }],
-    [{
-      text: "user3",
-      switch_inline_query_current_chat: "user3",
-    }],
-    [{
-      text: "user4",
-      switch_inline_query_current_chat: "user4",
-    }],
-    [{
-      text: "user5",
-      switch_inline_query_current_chat: "user5",
-    }],
-  ],
-  "event3": [
-    [{
-      text: "user1",
-      switch_inline_query_current_chat: "user1",
-    }],
-    [{
-      text: "user2",
-      switch_inline_query_current_chat: "user2",
-    }],
-    [{
-      text: "user3",
-      switch_inline_query_current_chat: "user3",
-    }],
-    [{
-      text: "user4",
-      switch_inline_query_current_chat: "user4",
-    }],
-  ],
-  "event4": [
-    [{
-      text: "user1",
-      switch_inline_query_current_chat: "user1",
-    }],
-    [{
-      text: "user2",
-      switch_inline_query_current_chat: "user2",
-    }],
-    [{
-      text: "user5",
-      switch_inline_query_current_chat: "user5",
-    }],
-    [{
-      text: "user6",
-      switch_inline_query_current_chat: "user6",
-    }],
-  ],
-};
-
-// eslint-disable-next-line prefer-const
-let people = {};
-// let riddhi = 1867755302;
-// let swapnil = 1092983868;
-// let testGroup = -750293094;
-
-// let preeti = 838931590;
-// let sparshi = 1074202347;
 const startOrHelp = (msg) => {
   // console.log(msg);
   const opt = Telegram.generateMessage(Telegram.HELP_MESSAGE);
@@ -94,78 +21,17 @@ bot.onText(/\/start/, startOrHelp);
 bot.onText(/\/help/, startOrHelp);
 
 bot.onText(/\/addTransaction/, async (msg) => {
-  const askEvent = await bot.sendMessage(msg.chat.id, "Please select event (Swipe and reply is must)", {
-    "reply_markup": {
-      force_reply: true,
-      one_time_keyboard: true,
-      // selective: true,
-      inline_keyboard: [
-        [{
-          text: "event1",
-          switch_inline_query_current_chat: "event1",
-        }],
-        [{
-          text: "event2",
-          switch_inline_query_current_chat: "event2",
-        }],
-        [{
-          text: "event3",
-          switch_inline_query_current_chat: "event3",
-        }],
-        [{
-          text: "event4",
-          switch_inline_query_current_chat: "event4",
-        }],
-      ],
-      // keyboard: ,
-    },
-    "reply_to_message_id": msg.message_id,
+  const events = await controller.listEvents(msg.from);
+  if (!events.status) return bot.sendMessage(msg.chat.id, events.error);
+  const opt = Telegram.generateMessage(Telegram.ADD_TRANSACTION, {
+    message_id: msg.message_id,
+    events: events.events
   });
-
-
-  bot.onReplyToMessage(msg.chat.id, askEvent.message_id, async (selectedEvent) => {
-    selectedEvent.text = selectedEvent.text.replace("@Dutchbebot ", "");
-    const askPaidBy = await bot.sendMessage(selectedEvent.chat.id, "Who Paid? (Swipe and reply is must)", {
-      "reply_markup": {
-        "force_reply": true,
-        "one_time_keyboard": true,
-        "selective": true,
-        "keyboard": obj[selectedEvent.text],
-      },
-    });
-
-    // eslint-disable-next-line max-len
-    bot.onReplyToMessage(selectedEvent.chat.id, askPaidBy.message_id, async (PaidBy) => {
-      PaidBy.text = PaidBy.text.replace("@DutchBeBot ", "");
-      const askAmount = await bot.sendMessage(PaidBy.chat.id, "Amount? (Swipe and reply is must)", {
-        "reply_markup": {
-          force_reply: true,
-          one_time_keyboard: true,
-          selective: true,
-        },
-      });
-
-      bot.onReplyToMessage(PaidBy.chat.id, askAmount.message_id, (amount) => {
-        // eslint-disable-next-line max-len
-        const msg = `Are you sure that ${PaidBy.text} paid ${amount.text} in ${selectedEvent.text}? (Swipe and reply is must)`;
-        bot.sendMessage(PaidBy.chat.id, msg, {
-          "reply_markup": {
-            force_reply: true,
-            one_time_keyboard: true,
-            selective: true,
-            keyboard: [
-              ["Yes"],
-              ["No"],
-            ],
-          },
-        });
-      });
-    });
-  });
+  const sentMessage = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
+  await controller.storeMessage(sentMessage.text, sentMessage.message_id, sentMessage.chat.id, Telegram.getString(Telegram.ADD_TRANSACTION), Telegram.getString(Telegram.SELECT_EVENT));
 });
 
 bot.onText(/\/getEvents/, async (msg) => {
-
   const events = await controller.listEvents(msg.from);
   const opt = Telegram.generateMessage(Telegram.LIST_EVENTS, events);
   const sentMessage = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
@@ -183,7 +49,6 @@ bot.onText(/\/myLinkedEmail/, async (msg) => {
   const reply = resp.status ? resp.account.email : resp.error;
   const response = await bot.sendMessage(msg.chat.id, reply);
   await controller.storeMessage(response.text, response.message_id, msg.chat.id, Telegram.getString(Telegram.LINKING_EMAIL_ID), Telegram.getString(Telegram.SUCCESS));
-
 });
 
 bot.onText(/\/getProfile/, async (msg) => {
@@ -224,21 +89,91 @@ bot.on('text', async (msg) => {
   lastMsg.msg.curFlow = Telegram.getWrapper(lastMsg.msg.curFlow);
   lastMsg.msg.nextFlow = Telegram.getWrapper(lastMsg.msg.nextFlow);
 
-  let opt, params, curFlow, nextFlow;
+  let opt, params, curFlow, nextFlow, metadata = {
+    ...lastMsg.msg.metadata
+  };
   if (lastMsg.msg.nextFlow === Telegram.LINKING_EMAIL_ID) {
     const response = await controller.linkAccount(msg.from, msg.text.trim());
     if (!response.status) return bot.sendMessage(msg.chat.id, response.error);
 
     curFlow = Telegram.getString(lastMsg.msg.nextFlow)
     nextFlow = Telegram.getString(Telegram.SUCCESS);
+  } else if (lastMsg.msg.nextFlow === Telegram.SELECT_EVENT) {
+    msg.text = msg.text.replace("@Dutchbebot", "").trim();
+    metadata.eventName = msg.text;
+    const users = await controller.getUsers(msg);
+    if (!users.status) return bot.sendMessage(msg.chat.id, users.error);
+    metadata.eventId = users.event.eventId
+
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow);
+    nextFlow = Telegram.getString(Telegram.ASK_PAID_BY);
+    params = {
+      message_id: msg.message_id,
+      users: users.members
+    }
+  } else if (lastMsg.msg.nextFlow === Telegram.ASK_PAID_BY) {
+    msg.text = msg.text.replace("@Dutchbebot", "").trim();
+    metadata.user = msg.text;
+
+    const user = await controller.getEventUser(metadata)
+    if (!user.status) return bot.sendMessage(msg.chat.id, user.error);
+    metadata.userId = user.user.userId
+
+    params = {
+      message_id: msg.message_id,
+    }
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow);
+    nextFlow = Telegram.getString(Telegram.GET_AMOUNT);
+  } else if (lastMsg.msg.nextFlow === Telegram.GET_AMOUNT) {
+    msg.text = msg.text.replace("@Dutchbebot", "").trim();
+    let amount = new Number(msg.text);
+    if (isNaN(amount)) return bot.sendMessage(msg.chat.id, 'Please send proper amount.')
+    metadata.amount = amount;
+    params = {
+      message_id: msg.message_id,
+      ...metadata,
+    }
+
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow);
+    nextFlow = Telegram.getString(Telegram.CONFIRM_PAYMENT);
+
+  } else if (lastMsg.msg.nextFlow === Telegram.CONFIRM_PAYMENT) {
+    const members = await eventsController.getMembersList({
+      eventId: metadata.eventId
+    })
+    if (!members.status) return bot.sendMessage(msg.chat.id, 'Empty members list.')
+
+    const body = {
+      share: {
+        paidBy: [{
+          id: metadata.userId,
+          amount: metadata.amount,
+        }],
+        splitIn: members.members.map(e => {
+          return {
+            id: e.userId
+          }
+        })
+      },
+      event: {
+        id: metadata.eventId,
+        name: metadata.eventName
+      }
+    }
+
+    await recordController.addTransaction({
+      body
+    })
+
+    curFlow = Telegram.getString(lastMsg.msg.nextFlow);
+    nextFlow = Telegram.getString(Telegram.SUCCESS);
+
   } else {
     curFlow = Telegram.getString(lastMsg.msg.nextFlow);
     nextFlow = Telegram.getString(Telegram.ERROR_MSG);
   }
 
-
-
   opt = Telegram.generateMessage(lastMsg.msg.nextFlow, params);
   const response = await bot.sendMessage(msg.chat.id, opt[0], opt[1]);
-  await controller.storeMessage(response.text, response.message_id, msg.chat.id, curFlow, nextFlow);
+  await controller.storeMessage(response.text, response.message_id, msg.chat.id, curFlow, nextFlow, metadata);
 })

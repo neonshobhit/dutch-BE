@@ -1,21 +1,25 @@
 const {
   db,
 } = require("../config/firebase");
+const eventsController = require('../controllers/events');
 const Telegram = require('../models/Telegram').Telegram;
 
 class Notification {
-  constructor(curFlow, nextFlow, msg, id, notConversation) {
+  constructor(curFlow, nextFlow, msg, id, notConversation, metadata) {
     this.msgId = id
     this.curFlow = curFlow;
     this.nextFlow = nextFlow;
     this.curMessage = msg;
     this.isConversation = !notConversation; // if its undefined, it must be true
     this.timestamp = new Date().getTime();
+    this.metadata = metadata;
   }
 }
 
-exports.storeMessage = async (msg, msgId, id, curFLow, nextFlow) => {
-  let entry = new Notification(curFLow, nextFlow, msg, msgId);
+exports.storeMessage = async (msg, msgId, id, curFLow, nextFlow, metadata) => {
+  if (!metadata) metadata = {}
+  metadata = Buffer.from(JSON.stringify(metadata)).toString('base64');
+  let entry = new Notification(curFLow, nextFlow, msg, msgId, true, metadata);
   entry = JSON.parse(JSON.stringify(entry));
   await db.collection('telegram').doc(id + '').collection('notifications').add(entry);
 };
@@ -29,9 +33,13 @@ exports.getLastMessage = async id => {
     }
   }
   let msg = undefined;
-  lastMessage.forEach((e) => msg = {
-    ...e.data(),
-    id: e.id
+  lastMessage.forEach((e) => {
+    let data = e.data();
+    if (data.metadata) data.metadata = JSON.parse(Buffer.from(data.metadata, 'base64').toString('ascii'));
+    msg = {
+      ...data,
+      id: e.id
+    }
   });
 
   return {
@@ -115,7 +123,10 @@ exports.getProfile = async (from) => {
     if (user.exists) {
       return {
         status: true,
-        account: user.data(),
+        account: {
+          ...user.data(),
+          id: user.id,
+        }
       };
     }
 
@@ -170,5 +181,49 @@ exports.listEvents = async (from) => {
   return {
     status: false,
     error: 'ACCOUNT_NOT_LINKED'
+  }
+}
+
+exports.getUsers = async (msg) => {
+  const acc = await exports.getProfile(msg.from);
+  if (!acc.status) return acc;
+
+  const groups = await db.collection('users').doc(acc.account.id + '').collection('events').where('name', '==', msg.text).get();
+  if (groups.empty)
+    return {
+      status: false,
+      error: 'NO_GROUPS_FOR_USER_ACCOUNT'
+    }
+
+  // considering last message of the list of matched groups
+  let ev = {}
+  groups.forEach(e => ev.eventId = e.id);
+
+  const members = await eventsController.getMembersList(ev)
+  members.event = ev
+  return members;
+}
+
+exports.getEventUser = async (metadata) => {
+  const event = await db.collection('events').doc(metadata.eventId).get();
+  if (!event.exists) return {
+    status: false,
+    error: 'NO_EVENT_FOUND',
+  }
+
+  let member = undefined;
+
+  event.data().members.forEach((v, ind, arr) => {
+    if (v.name === metadata.user) member = v;
+  })
+
+  if (!member) return {
+    status: false,
+    error: 'USER_NOT_FOUND',
+  }
+
+  return {
+    status: true,
+    user: member
   }
 }
