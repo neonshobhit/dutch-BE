@@ -267,8 +267,7 @@ exports.addFriend = async (req, res) => {
 };
 
 exports.fetchFriends = async (req, res) => {
-	const userId = req.user.id;
-
+	const userId = req.user.userId;
 	let out = {};
 	await db
 		.collection("users")
@@ -279,7 +278,8 @@ exports.fetchFriends = async (req, res) => {
 			const data = [];
 			snap.forEach((e) => {
 				data.push({
-					[e.id]: e.data(),
+					id: e.id,
+					...e.data(),
 				});
 			});
 			out = {
