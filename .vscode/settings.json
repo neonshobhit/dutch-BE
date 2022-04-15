@@ -1,5 +1,8 @@
 {
   "files.insertFinalNewline": true,
   "editor.formatOnSave": true,
-  "beautify.ignore": "end_with_newline"
+  "beautify.ignore": "end_with_newline",
+  "appService.showBuildDuringDeployPrompt": false,
+  "appService.defaultWebAppToDeploy": "/subscriptions/2821b8fb-9150-4419-88a9-c9541e09d91a/resourceGroups/NodeJS/providers/Microsoft.Web/sites/DUTCH",
+  "appService.deploySubpath": "."
 }
