@@ -5,14 +5,12 @@ require("dotenv").config();
 require("./routers/telegram");
 const app = express();
 require('./models/Telegram');
-// const morgan = require('morgan')
+const morgan = require('morgan')
 
 
-app.use(cors({
-  origin: true,
-}));
+app.use(cors());
 app.use(express.json());
-// app.use(morgan('tiny'))
+app.use(morgan('tiny'))
 // Assigning multipe times so that we can depl
 // each one as an individual function at Cloud Funcitions
 const users = app;

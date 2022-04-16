@@ -54,9 +54,10 @@ router.get("/profile", decode, async (req, res) => {
   res.status(out.statusCode).json(out);
 });
 
-router.post('/listEvents', decode, async (req, res) => {
+router.get('/listEvents', decode, async (req, res) => {
+  console.log(req.user)
   const out = await user.listEvents({
-    userId: req.body.userId
+    userId: req.user.userId
   })
 
   res.status(out.statusCode).json(out);

@@ -44,6 +44,7 @@ exports.add = async (req, res) => {
       statusCode: 200,
       email: req.body.email,
       otp,
+      id: newUser.id
     };
     return data;
   } else {
@@ -312,6 +313,7 @@ exports.profile = async (body) => {
 exports.listEvents = async (body) => {
   const events = await db.collection('users').doc(body.userId).collection('events').get()
   let response = events.docs.map(e => e.data());
+  console.log(response)
 
   return {
     data: response,

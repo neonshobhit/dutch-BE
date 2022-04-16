@@ -40,8 +40,10 @@ exports.create = async (req, res) => {
     .collection("records")
     .add({
       message: "Event created",
+      type: 'TAG',
       userId: null,
       tag: true,
+      timestamp: new Date().getTime()
     });
 
   return {

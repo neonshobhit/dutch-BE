@@ -221,10 +221,10 @@ exports.addBannerActivity = async (req, res) => {
 exports.addMessageActivity = async (req, res) => {
   const {
     eventId,
-    userId,
-    newMesssage,
+    newMessage,
   } = req.body;
 
+  const userId = req.user.userId
   const event = db.collection("events").doc(eventId);
   const eventInfo = (await event.get()).data();
 
@@ -241,13 +241,13 @@ exports.addMessageActivity = async (req, res) => {
     }
 
     const entryData = {
-      type: "message",
+      type: "MESSAGE",
       message: {
         sender: {
           id: userId,
           email: userInfo.email,
         },
-        message: newMesssage,
+        message: newMessage,
       },
       timestamp: new Date().getTime(),
     };
@@ -344,7 +344,7 @@ exports.fetchRecords = async (req, res) => {
       .collection("events")
       .doc(eventId)
       .collection("records")
-      .orderBy("timestamp", "desc")
+      .orderBy("timestamp", "asc")
       .limit(limit)
       .offset(offset)
       .get();
