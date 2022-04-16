@@ -8,6 +8,7 @@ module.exports = {
     "eslint:recommended",
     "google",
   ],
+  ignorePatters: ["models/Telegram.js"],
   rules: {
     "quotes": ["error", "double"],
     "linebreak-style": 0,

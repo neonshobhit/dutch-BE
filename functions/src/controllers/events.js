@@ -25,13 +25,25 @@ exports.create = async (req, res) => {
     }],
   });
 
+  await db.collection('users')
+    .doc(_b.userId)
+    .collection('events')
+    .doc(ev.id)
+    .set({
+      name: _b.name,
+      imageURL: _b.imageURL,
+      eventId: ev.id,
+    })
+
   await db.collection("events")
     .doc(ev.id)
     .collection("records")
     .add({
       message: "Event created",
+      type: 'TAG',
       userId: null,
       tag: true,
+      timestamp: new Date().getTime()
     });
 
   return {
@@ -101,6 +113,7 @@ exports.getMembersList = async (_b) => {
 
   return {
     statusCode: 200,
+    status: true,
     members: (await ref.get()).data().members,
   };
 };

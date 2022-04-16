@@ -196,7 +196,7 @@ exports.addBannerActivity = async (req, res) => {
       message: {
         message: newMesssage,
       },
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
     };
     const recordId = await db
       .collection("events")
@@ -221,10 +221,10 @@ exports.addBannerActivity = async (req, res) => {
 exports.addMessageActivity = async (req, res) => {
   const {
     eventId,
-    userId,
-    newMesssage,
+    newMessage,
   } = req.body;
 
+  const userId = req.user.userId
   const event = db.collection("events").doc(eventId);
   const eventInfo = (await event.get()).data();
 
@@ -241,15 +241,15 @@ exports.addMessageActivity = async (req, res) => {
     }
 
     const entryData = {
-      type: "message",
+      type: "MESSAGE",
       message: {
         sender: {
           id: userId,
           email: userInfo.email,
         },
-        message: newMesssage,
+        message: newMessage,
       },
-      timestamp: new Date().getTime()
+      timestamp: new Date().getTime(),
     };
 
     const recordId = await db
@@ -271,7 +271,7 @@ exports.addMessageActivity = async (req, res) => {
   return out;
 };
 
-//Settlement Activity 
+// Settlement Activity 
 exports.addSettlementActivity = async (req, res) => {
   try {
     let userId = req.user.userId ? req.user.userId : "";
@@ -283,7 +283,7 @@ exports.addSettlementActivity = async (req, res) => {
     const {
       eventId,
       ammount,
-      otherEmail
+      otherEmail,
     } = req.body;
     const event = db.collection("events").doc(eventId);
     const eventInfo = (await event.get()).data();
@@ -299,8 +299,8 @@ exports.addSettlementActivity = async (req, res) => {
     if (snapshot.empty) {
       return {
         statusCode: 401,
-        message: "Friend is not Found."
-      }
+        message: "Friend is not Found.",
+      };
     }
     let otherUserId;
     snapshot.forEach((e) => otherUserId = e.id);
@@ -310,8 +310,8 @@ exports.addSettlementActivity = async (req, res) => {
       from: userId,
       to: otherUserId,
       ammount,
-      timestamp: new Date().getTime()
-    }
+      timestamp: new Date().getTime(),
+    };
 
     const recordId = await db
       .collection("events")
@@ -321,45 +321,45 @@ exports.addSettlementActivity = async (req, res) => {
 
     return {
       statusCode: 200,
-      message: "Added Settlement."
-    }
+      message: "Added Settlement.",
+    };
   } catch (err) {
     return {
       statusCode: 501,
-      error: err.message
-    }
+      error: err.message,
+    };
   }
-}
+};
 
 exports.fetchRecords = async (req, res) => {
   try {
-    let {
+    const {
       eventId,
       limit,
       offset,
-      timestamp
+      timestamp,
     } = req.body;
 
     const fetchedData = await db
       .collection("events")
       .doc(eventId)
       .collection("records")
-      .orderBy("timestamp", "desc")
+      .orderBy("timestamp", "asc")
       .limit(limit)
       .offset(offset)
       .get();
-    let data = []
-    for (let x of fetchedData.docs) {
-      data.push(x.data())
+    const data = [];
+    for (const x of fetchedData.docs) {
+      data.push(x.data());
     }
     return {
       statusCode: 200,
-      fetchedData: data
-    }
+      fetchedData: data,
+    };
   } catch (err) {
     return {
       statusCode: 501,
-      error: err.message
+      error: err.message,
     };
   }
-}
+};
