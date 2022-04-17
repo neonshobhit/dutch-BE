@@ -56,6 +56,22 @@ exports.create = async (req, res) => {
 exports.addMembers = async (req, res) => {
   const _b = req.body;
   const ref = db.collection("events").doc(_b.eventId);
+  console.log(_b)
+
+  const mems = await db.collection('users').where('email', '==', _b.memberEmail).get()
+  let reqMem;
+  mems.forEach((res) => {
+    reqMem = res.data()
+    reqMem.id = res.id
+  })
+
+  console.log(reqMem)
+  if (mems.empty) {
+    return {
+      error: 'No user with this email Id',
+      statusCode: 404,
+    }
+  }
   // ref must be declared outside of transaction.
 
   // Adding member to the member list.
@@ -64,7 +80,7 @@ exports.addMembers = async (req, res) => {
     const old = (await t.get(ref)).data(); // read from transaction
     // console.log(oldList)
     const newList = [...old.members, {
-      userId: _b.memberId,
+      userId: reqMem.id,
       name: _b.memberName,
       isGuest: _b.isGuest,
     }];
@@ -82,6 +98,7 @@ exports.addMembers = async (req, res) => {
     // graph[_b.memberId] = noDueMap
 
     // updating on transaction
+    console.log(newList)
     t.update(ref, {
       members: newList,
       // graph: graph
@@ -119,8 +136,8 @@ exports.getMembersList = async (_b) => {
 };
 
 exports.display = async (req, res) => {
-  const _b = req.body;
-  const ref = db.collection("events").doc(_b.eventId);
+  const eventId = req.params.eventId
+  const ref = db.collection("events").doc(eventId);
 
   return {
     statusCode: 200,
