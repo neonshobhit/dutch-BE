@@ -16,6 +16,7 @@ exports.add = async (req, res) => {
 		const newUser = await db.collection("users").add({
 			email: req.body.email,
 			isVerified: false,
+			name: req.body.email.substring(0, req.body.email.indexOf("@")),
 			// Cumulative of all groups for paying and receiving for this user
 			toPay: 0,
 			toReceive: 0,

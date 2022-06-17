@@ -38,8 +38,10 @@ exports.create = async (req, res) => {
 
 	await db.collection("events").doc(ev.id).collection("records").add({
 		message: "Event created",
+		type: "TAG",
 		userId: null,
 		tag: true,
+		timestamp: new Date().getTime(),
 	});
 
 	return {
@@ -52,52 +54,36 @@ exports.create = async (req, res) => {
 exports.addMembers = async (req, res) => {
 	const _b = req.body;
 	const ref = db.collection("events").doc(_b.eventId);
-	// ref must be declared outside of transaction.
+	console.log(_b);
 
-	// Check if ref exists
-	const event = (await ref.get()).data();
-	if (!event) {
-		return {
-			statusCode: 500,
-			message: "Event Doesn't Exist.",
-		};
-	}
-
-	const snapshot = await db
+	const mems = await db
 		.collection("users")
 		.where("email", "==", _b.memberEmail)
 		.get();
+	let reqMem;
+	mems.forEach((res) => {
+		reqMem = res.data();
+		reqMem.id = res.id;
+	});
 
-	if (snapshot.empty) {
+	console.log(reqMem);
+	if (mems.empty) {
 		return {
-			statusCode: 401,
-			message: "Member is not Found.",
+			error: "No user with this email Id",
+			statusCode: 404,
 		};
 	}
-
-	let otherUserId;
-	snapshot.forEach((e) => (otherUserId = e.id));
-	//Check if member already exists
-	const isMemberAlreadyExists = event.members.find(
-		(e) => e.userId === otherUserId,
-	);
-	if (isMemberAlreadyExists) {
-		return {
-			statusCode: 401,
-			message: "Member is already added.",
-		};
-	}
+	// ref must be declared outside of transaction.
 
 	// Adding member to the member list.
 	// Also updating the graph by initializing due amount to be 0 to each other.
 	const members = await db.runTransaction(async (t) => {
 		const old = (await t.get(ref)).data(); // read from transaction
-
 		// console.log(oldList)
 		const newList = [
 			...old.members,
 			{
-				userId: otherUserId,
+				userId: reqMem.id,
 				name: _b.memberName,
 				isGuest: _b.isGuest,
 			},
@@ -116,6 +102,7 @@ exports.addMembers = async (req, res) => {
 		// graph[_b.memberId] = noDueMap
 
 		// updating on transaction
+		console.log(newList);
 		t.update(ref, {
 			members: newList,
 			// graph: graph
