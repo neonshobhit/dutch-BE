@@ -1,16 +1,18 @@
+require("dotenv").config({ path: `${__dirname}/./../.env` });
 const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
 require("./routers/telegram");
 const app = express();
-require('./models/Telegram');
-const morgan = require('morgan')
-
-
-app.use(cors());
+require("./models/Telegram");
+// const morgan = require('morgan')
+app.use(
+	cors({
+		origin: true,
+	}),
+);
 app.use(express.json());
-app.use(morgan('tiny'))
+app.use(morgan("tiny"));
 // Assigning multipe times so that we can depl
 // each one as an individual function at Cloud Funcitions
 const users = app;
@@ -29,7 +31,7 @@ events.use("/events", require("./routers/event"));
 // app.use("/events", require("./routers/event"));
 
 app.get("*", (req, res) => {
-  res.send("hello world");
+	res.send("hello world");
 });
 
 // app.post('*', (req, res) => {
@@ -38,12 +40,11 @@ app.get("*", (req, res) => {
 //     console.log(req.header("authorization"));
 //     res.send("hello world")
 // })
-
 if (process.env.ENV) {
-  const port = require("./config/env").server.port
-  app.listen(port, () => {
-    console.log("server is up and running", port);
-  });
+	const port = require("./config/env").server.port;
+	app.listen(port, () => {
+		console.log("server is up and running", port);
+	});
 }
 // exports.module = functions.https.onRequest(app);
 

@@ -1,32 +1,33 @@
 {
-  "name": "dutch",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon functions/src/index.js",
-    "test": "jest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "esm": "^3.2.25",
-    "express": "^4.17.1",
-    "firebase-admin": "^9.7.0",
-    "firebase-functions": "^3.14.1",
-    "jsonwebtoken": "^8.5.1",
-    "log-to-file": "^2.0.2",
-    "morgan": "^1.10.0",
-    "node-telegram-bot-api": "^0.53.0",
-    "nodemon": "^2.0.7",
-    "qrcode": "^1.4.4",
-    "speakeasy": "^2.0.0",
-    "uuid": "^8.3.2",
-    "uuidv4": "^6.2.7"
-  },
-  "devDependencies": {
-    "jest": "^26.6.3"
-  }
+	"name": "dutch",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon functions/src/index.js",
+		"test": "jest"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^14.2.0",
+		"esm": "^3.2.25",
+		"express": "^4.17.1",
+		"firebase-admin": "^9.7.0",
+		"firebase-functions": "^3.14.1",
+		"jsonwebtoken": "^8.5.1",
+		"log-to-file": "^2.0.2",
+		"morgan": "^1.10.0",
+		"node-telegram-bot-api": "^0.53.0",
+		"nodemon": "^2.0.7",
+		"qrcode": "^1.4.4",
+		"speakeasy": "^2.0.0",
+		"uuid": "^8.3.2",
+		"uuidv4": "^6.2.7"
+	},
+	"devDependencies": {
+		"jest": "^26.6.3"
+	}
 }
