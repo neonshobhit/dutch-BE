@@ -1,6 +1,7 @@
 // eslint-disable-next-line new-cap
 const router = require("express").Router();
 const event = require("../controllers/events");
+const { decode } = require("../services/auth");
 
 router.post("/newevent", async (req, res) => {
 	const out = await event.create(req, res);
@@ -30,10 +31,9 @@ router.get("/getmembers/:id", async (req, res) => {
 	res.status(out.statusCode).json(out);
 });
 
-router.post("/display", async (req, res) => {
+router.get("/display/:eventId", decode, async (req, res) => {
 	const out = await event.display(req, res);
 
 	res.status(out.statusCode).json(out);
 });
-
 module.exports = router;

@@ -151,8 +151,8 @@ exports.getMembersList = async (_b) => {
 };
 
 exports.display = async (req, res) => {
-	const _b = req.body;
-	const ref = db.collection("events").doc(_b.eventId);
+	const eventId = req.params.eventId;
+	const ref = db.collection("events").doc(eventId);
 
 	return {
 		statusCode: 200,

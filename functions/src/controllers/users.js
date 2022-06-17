@@ -47,10 +47,25 @@ exports.add = async (req, res) => {
 	} else {
 		let id;
 		snapshot.forEach((e) => (id = e.id));
+		const user = await db.collection("users").doc(id);
+		const userData = (await user.get()).data();
+		if (!userData.isVerified) {
+			const secret = await user
+				.collection("userSecret")
+				.doc(userData.secretId);
+			const secretData = (await secret.get()).data();
+			await sendOtp(req.body.email, secretData.otp);
+			const data = {
+				statusCode: 200,
+				email: req.body.email,
+			};
+			return data;
+		}
 		const data = {
 			statusCode: 403,
 			id,
-			error: "Email Id already exists",
+			error: "Email Id already verified.",
+			isOtpVerified: userData.isVerified,
 		};
 		return data;
 	}

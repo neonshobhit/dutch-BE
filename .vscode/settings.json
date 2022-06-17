@@ -1,5 +1,7 @@
 {
   "files.insertFinalNewline": true,
   "editor.formatOnSave": true,
-  "beautify.ignore": "end_with_newline"
+  "beautify.ignore": "end_with_newline",
+  "docwriter.style": "Auto-detect",
+  "liveServer.settings.port": 5501
 }
